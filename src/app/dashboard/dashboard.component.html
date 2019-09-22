@@ -1,2 +1,5 @@
-<p>Dashboard</p>
-<Button (click)="onButtonClick()">Load</Button>
+<h1>Dashboard</h1>
+<div *ngFor="let latestValue of lastData">
+    <p>{{latestValue.description}}: {{latestValue.value}} {{latestValue.unit}}</p>
+</div>
+<div id="container"></div>

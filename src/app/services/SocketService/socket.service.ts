@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import * as socketIo from 'socket.io-client';
 import { Observable } from 'rxjs';
 
-const SERVER_URL = 'http://localhost:8080';
+const SERVER_URL = 'wws://localhost:8080';
 
 @Injectable({
     providedIn: 'root',
@@ -11,7 +11,9 @@ export class SocketService {
     private socket;
 
     public initSocket(): void {
-        this.socket = socketIo(SERVER_URL);
+        this.socket = socketIo(SERVER_URL, {
+            transports: ['websocket', 'xhr-polling']
+        });
     }
 
     public send(message: any): void {
