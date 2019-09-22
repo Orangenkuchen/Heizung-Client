@@ -44,18 +44,17 @@ export class DashboardComponent implements OnInit {
   public options: any = {
     chart: {
       type: 'line',
-      height: 700,
-      width: 700
+      height: 700
     },
     title: {
       text: 'Heizungswerte (24h)'
     },
     credits: {
-      enabled: false
+      enabled: true
     },
     tooltip: {
       formatter: function() {
-        return 'x: ' + Highcharts.dateFormat('%e %b %y %H:%M:%S', this.x) + 'y: ' + this.y.toFixed(2);
+        return `${Math.round(this.y.toFixed(2) * 10) / 10} °C ${Highcharts.dateFormat('%e %b %y %H:%M:%S', this.x)}`;
       }
     },
     xAxis: {
@@ -86,8 +85,19 @@ export class DashboardComponent implements OnInit {
         name: 'Puffer unten',
         turboThreshold: 500000,
         data: []
-      }
-    ]
+      },
+      {
+        name: 'Außentemperatur',
+        turboThreshold: 500000,
+        data: []
+      },
+    ],
+    plotOptions: {
+        series: {
+            gapSize: 5,
+            gapUnit: 30 * 60 * 1000
+        }
+    },
   }
 
   constructor(private socketService: SocketService, private websocketService: WebsocketService) { }
@@ -116,9 +126,26 @@ export class DashboardComponent implements OnInit {
         for(let heaterTypeId in serverToClientCommand.dataObject) {
           let heaterType = serverToClientCommand.dataObject[heaterTypeId];
 
+          let dataWithGaps = [];
+          let lastDate: Date;
+
           heaterType.data.forEach((dataPoint) => {
             dataPoint.timestamp = new Date(dataPoint.timestamp);
+
+            if (lastDate != null) {
+              // @ts-ignore
+              if (dataPoint.timestamp - lastDate > 30 * 60 * 1000) {
+                let tempDate = new Date(lastDate.setMilliseconds(lastDate.getMilliseconds() + 1));
+
+                dataWithGaps.push({ timestamp: tempDate, value: null });
+              }
+            }
+
+            dataWithGaps.push(dataPoint);
+            lastDate = dataPoint.timestamp;
           });
+
+          heaterType.data = dataWithGaps;
         }
 
         this.data = serverToClientCommand.dataObject;
@@ -146,6 +173,14 @@ export class DashboardComponent implements OnInit {
           unit: this.data[21].unit
         }
         this.lastData.push(latetstPufferUntenValue);
+
+        let latetstBetriebsstundenValue: LatestValue = {
+          description: this.data[30].description,
+          timestamp: this.data[30].data[this.data[21].data.length - 1].timestamp,
+          value: this.data[30].data[this.data[21].data.length - 1].value,
+          unit: this.data[30].unit
+        }
+        this.lastData.push(latetstBetriebsstundenValue);
 
         // Highchart
         this.options.series[0].data.length = 0;
@@ -176,6 +211,16 @@ export class DashboardComponent implements OnInit {
           hightChartPoint.push(dataPoint.value);
 
           this.options.series[2].data.push(hightChartPoint);
+        });
+
+        this.options.series[3].data.length = 0;
+        this.data[28].data.forEach((dataPoint) => {
+          let hightChartPoint = [];
+
+          hightChartPoint.push(dataPoint.timestamp.getTime());
+          hightChartPoint.push(dataPoint.value);
+
+          this.options.series[3].data.push(hightChartPoint);
         });
 
         Highcharts.chart('container', this.options);
