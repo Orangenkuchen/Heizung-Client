@@ -5,6 +5,8 @@ import { ServerToClientCommandType } from '../entities/socket/serverToClient/Ser
 import { WebsocketService } from '../services/WebSocket/web-socket.service';
 import { Subject } from 'rxjs';
 import * as Highcharts from 'highcharts';
+import * as Moment from 'moment-timezone';
+
 //import * as Boost from 'highcharts/modules/boost';
 //import * as noData from 'highcharts/modules/no-data-to-display';
 //import * as More from 'highcharts/highcharts-more';
@@ -47,7 +49,7 @@ export class DashboardComponent implements OnInit {
       height: 700
     },
     title: {
-      text: 'Heizungswerte (24h)'
+      text: 'Heizungswerte'
     },
     credits: {
       enabled: true
@@ -104,7 +106,9 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.initIoConnection();
-    
+
+    window["moment"] = Moment;
+
     setTimeout(() => {
       let formDate = new Date(new Date().setDate(new Date().getDate() - 1));
       let toDate = new Date();
@@ -114,6 +118,20 @@ export class DashboardComponent implements OnInit {
         toDate: toDate
       });
     }, 1000);
+  }
+
+  public daysDisplayedCount: number = 1;
+
+  public handleOnTimeButtonClicked(daysToDisplay: number): void {
+      let formDate = new Date(new Date().setDate(new Date().getDate() - daysToDisplay));
+      let toDate = new Date();
+
+      this.daysDisplayedCount = daysToDisplay;
+
+      this.sendMessage({
+        fromDate: formDate,
+        toDate: toDate
+      });
   }
 
   private initIoConnection(): void {
@@ -134,7 +152,7 @@ export class DashboardComponent implements OnInit {
 
             if (lastDate != null) {
               // @ts-ignore
-              if (dataPoint.timestamp - lastDate > 30 * 60 * 1000) {
+              if (dataPoint.timestamp - lastDate > 60 * 60 * 1000) {
                 let tempDate = new Date(lastDate.setMilliseconds(lastDate.getMilliseconds() + 1));
 
                 dataWithGaps.push({ timestamp: tempDate, value: null });
@@ -149,6 +167,8 @@ export class DashboardComponent implements OnInit {
         }
 
         this.data = serverToClientCommand.dataObject;
+
+        this.lastData.length = 0;
 
         let latetstAbgasValue: LatestValue = {
           description: this.data[3].description,
@@ -221,6 +241,12 @@ export class DashboardComponent implements OnInit {
           hightChartPoint.push(dataPoint.value);
 
           this.options.series[3].data.push(hightChartPoint);
+        });
+    
+        Highcharts.setOptions({
+            time: {
+                timezone: 'Europe/Berlin'
+            }
         });
 
         Highcharts.chart('container', this.options);
