@@ -1,5 +1,81 @@
-<h1>Dashboard</h1>
-<div *ngFor="let latestValue of lastData">
+<h1 style="margin-left: 10px;">Dashboard</h1>
+<div style="padding: 5px; ">
+    <div class="Panel">
+        <div class="Header">
+            Heizungsstatus
+        </div>
+        <div [ngSwitch]="dataService.currentState.value"
+             style="text-align: center; 
+                    margin-top: 100px; 
+                    font-size: 30px; 
+                    font-weight: bold;">
+            <div *ngSwitchDefault>Lädt...</div>
+            <div *ngSwitchCase="3">Feuer an</div>
+            <div *ngSwitchCase="5">Feuer aus</div>
+            <div *ngSwitchCase="6">Tür auf</div>
+            <div *ngSwitchCase="2">Anheizen</div>
+        </div>
+    </div>
+    <div class="Panel">
+        <div class="Header">
+            Abgastemperatur
+        </div>
+        <mwl-gauge
+            [max]="250"
+            [dialStartAngle]="10"
+            [dialEndAngle]="170"
+            [value]="dataService.currentExhaustTemperature.value"
+            [label]="temperatureToString"
+            [animated]="true"
+            [animationDuration]="1">
+        </mwl-gauge>
+    </div>
+    <div class="Panel">
+        <div class="Header">
+            Puffer oben
+        </div>
+        <mwl-gauge
+            [max]="90"
+            [dialStartAngle]="10"
+            [dialEndAngle]="170"
+            [value]="dataService.currentBufferTopTemperature.value"
+            [label]="temperatureToString"
+            [animated]="true"
+            [animationDuration]="1">
+        </mwl-gauge>
+    </div>
+    <div class="Panel">
+        <div class="Header">
+            Puffer unten
+        </div>
+        <mwl-gauge
+            [max]="90"
+            [dialStartAngle]="10"
+            [dialEndAngle]="170"
+            [value]="dataService.currentBufferBottomTemperature.value"
+            [label]="temperatureToString"
+            [animated]="true"
+            [animationDuration]="1">
+        </mwl-gauge>
+    </div>
+    <div class="Panel">
+        <div class="Header">
+            Außentemperatur
+        </div>
+        <mwl-gauge
+            [min]="-20"
+            [max]="50"
+            [dialStartAngle]="10"
+            [dialEndAngle]="170"
+            [value]="dataService.currentOutsideTemperature.value"
+            [label]="temperatureToString"
+            [animated]="true"
+            [animationDuration]="1">
+        </mwl-gauge>
+    </div>
+</div>
+
+<!--<div *ngFor="let latestValue of lastData">
     <p>{{latestValue.description}}: {{latestValue.value}} {{latestValue.unit}}</p>
 </div>
 <hr/>
@@ -12,4 +88,4 @@
 <Button class="someButton"
         [class.Active]="daysDisplayedCount == 1" 
         (click)="handleOnTimeButtonClicked(1)">Tag</Button>
-<div id="container"></div>
+<div id="container"></div>-->

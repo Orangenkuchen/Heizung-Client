@@ -1,4 +1,4 @@
-import { Component, OnInit, ɵisBoundToModule__POST_R3__ } from '@angular/core';
+import { Component, OnInit, ɵisBoundToModule__POST_R3__, ViewEncapsulation } from '@angular/core';
 import { SocketService } from '../services/SocketService/socket.service';
 import { ServerToClientCommand } from '../entities/socket/serverToClient/ServerToClientCommand';
 import { ServerToClientCommandType } from '../entities/socket/serverToClient/ServerToClientCommandType';
@@ -6,6 +6,7 @@ import { WebsocketService } from '../services/WebSocket/web-socket.service';
 import { Subject } from 'rxjs';
 import * as Highcharts from 'highcharts';
 import * as Moment from 'moment-timezone';
+import { DataService } from '../services/DataService/data.service';
 
 //import * as Boost from 'highcharts/modules/boost';
 //import * as noData from 'highcharts/modules/no-data-to-display';
@@ -36,7 +37,8 @@ export interface LatestValue {
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.less']
+  styleUrls: ['./dashboard.component.less'],
+  encapsulation : ViewEncapsulation.None
 })
 export class DashboardComponent implements OnInit {
   data: any;
@@ -102,14 +104,16 @@ export class DashboardComponent implements OnInit {
     },
   }
 
-  constructor(private socketService: SocketService, private websocketService: WebsocketService) { }
+  constructor(private socketService: SocketService, public dataService: DataService) { }
 
   ngOnInit(): void {
-    this.initIoConnection();
+    //this.initIoConnection();
 
     window["moment"] = Moment;
 
-    setTimeout(() => {
+    this.dataService.currentExhaustTemperature.value;
+
+    /*setTimeout(() => {
       let formDate = new Date(new Date().setDate(new Date().getDate() - 1));
       let toDate = new Date();
 
@@ -117,8 +121,11 @@ export class DashboardComponent implements OnInit {
         fromDate: formDate,
         toDate: toDate
       });
-    }, 1000);
+    }, 1000);*/
   }
+
+
+  public temperatureToString = (number) => { return number + "°C"; };
 
   public daysDisplayedCount: number = 1;
 
@@ -135,7 +142,7 @@ export class DashboardComponent implements OnInit {
   }
 
   private initIoConnection(): void {
-    this.webSocket = this.websocketService.createWebsocket();
+    /*this.webSocket = this.websocketService.webSocket;
 
     this.webSocket.subscribe((messageEvent) => {
       let serverToClientCommand = JSON.parse(messageEvent.data);
@@ -255,7 +262,7 @@ export class DashboardComponent implements OnInit {
       console.log('Error');
     }, () => {
       console.log('disconnected');
-    })
+    })*/
 
     /*this.webSocket.subscribe((serverToClientCommand: ServerToClientCommand<any>) => {
         if (serverToClientCommand.commandType == ServerToClientCommandType.AllDataCommand) {
