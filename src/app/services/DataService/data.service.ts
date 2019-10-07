@@ -15,6 +15,10 @@ export interface DataPoint {
 })
 export class DataService {
     // #region fields
+    /**
+     * Array mit Callbacks welche ausgeführt werden, wenn die Daten vom Service aktualisiert wurden
+     */
+    private onDataChangedCallbacks = new Array<() => void>();
     // #endregion
 
     // #region currentState
@@ -83,6 +87,29 @@ export class DataService {
     }
     // #endregion
 
+    // #region addOnDataChangeCallback
+    /**
+     * Fügt ein Callback hinzu welches aufgerufen wird, wenn die Daten vom Service sich ändern
+     * 
+     * @param callback Das Callback welches hinzugefügt werden soll
+     * @returns Gibt die unsubscribefunktion zurück
+     */
+    public addOnDataChangeCallback(callback: () => void): () => void {
+        let unsubscribe: () => void;
+        let that = this;
+
+        this.onDataChangedCallbacks.push(callback);
+
+        unsubscribe = () => {
+            let index = that.onDataChangedCallbacks.indexOf(callback);
+
+            that.onDataChangedCallbacks.splice(index, 1);
+        };
+
+        return unsubscribe;
+    }
+    // #endregion
+
     // #region handleOnWebSocketMessage
     /**
      * Arbeite einen Nachricht vom Websocketserver ab
@@ -103,47 +130,6 @@ export class DataService {
             that.fillCurrentValue(that.dataHashTable, HeaterDataType.Puffer_oben, that.currentBufferTopTemperature);
             that.fillCurrentValue(that.dataHashTable, HeaterDataType.Puffer_unten, that.currentBufferBottomTemperature);
             that.fillCurrentValue(that.dataHashTable, HeaterDataType.Aussentemperatur, that.currentOutsideTemperature);
-    
-            // Highchart
-            /*this.options.series[0].data.length = 0;
-            this.data[3].data.forEach((dataPoint) => {
-                let hightChartPoint = [];
-    
-                hightChartPoint.push(dataPoint.timestamp.getTime());
-                hightChartPoint.push(dataPoint.value);
-    
-                this.options.series[0].data.push(hightChartPoint);
-            });
-    
-            this.options.series[1].data.length = 0;
-            this.data[20].data.forEach((dataPoint) => {
-                let hightChartPoint = [];
-    
-                hightChartPoint.push(dataPoint.timestamp.getTime());
-                hightChartPoint.push(dataPoint.value);
-    
-                this.options.series[1].data.push(hightChartPoint);
-            });
-    
-            this.options.series[2].data.length = 0;
-            this.data[21].data.forEach((dataPoint) => {
-                let hightChartPoint = [];
-    
-                hightChartPoint.push(dataPoint.timestamp.getTime());
-                hightChartPoint.push(dataPoint.value);
-    
-                this.options.series[2].data.push(hightChartPoint);
-            });
-    
-            this.options.series[3].data.length = 0;
-            this.data[28].data.forEach((dataPoint) => {
-                let hightChartPoint = [];
-    
-                hightChartPoint.push(dataPoint.timestamp.getTime());
-                hightChartPoint.push(dataPoint.value);
-    
-                this.options.series[3].data.push(hightChartPoint);
-            });*/
         }
     }
     // #endregion
