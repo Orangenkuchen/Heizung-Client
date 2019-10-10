@@ -1,0 +1,21 @@
+<h1 style="margin-left: 10px;">Betriebsstunden</h1>
+<div style="padding: 5px; ">
+    <table style="width: 100%;
+                  max-width: 500px;
+                  padding: 10px; ">
+        <thead>
+            <tr>
+                <th><p>Datum</p></th>
+                <th><p>Stunden</p></th>
+                <th><p>Stunden Insgesamt</p></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let dataPoint of dataService.totalRunTimeByDay">
+                <td><p>{{dataPoint.date.format("DD.MM.YYYY")}}</p></td>
+                <td><p>{{dataPoint.runHours}}</p></td>
+                <td><p>{{dataPoint.absoluteHours | number}}</p></td>
+            </tr>
+        </tbody>
+    </table>
+</div>

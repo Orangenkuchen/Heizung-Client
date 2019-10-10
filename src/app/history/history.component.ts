@@ -26,6 +26,11 @@ export class HistoryComponent implements OnInit, OnDestroy {
      * Dieser Array enthält unsubscribe Funktionen
      */
     private unsubscribeArray = Array<() => void>();
+
+    /**
+     * Die Anzahl der Tage welche angezeigt werden soll
+     */
+    private showedDaysCount: number;
     // #endregion
 
     constructor(private dataService: DataService) { }
@@ -34,10 +39,19 @@ export class HistoryComponent implements OnInit, OnDestroy {
         window["moment"] = Moment;
 
         let that = this;
+        this.showedDaysCount = 1;
         this.refreshHighchartData(that);
 
         let unsubscribe = this.dataService.addOnDataChangeCallback(() => this.refreshHighchartData(that));
         this.unsubscribeArray.push(unsubscribe);
+
+        Highcharts.setOptions({
+            time: {
+                timezone: 'Europe/Berlin'
+            }
+        });
+
+        Highcharts.chart('container', this.options);
     }
 
     ngOnDestroy() {
@@ -51,7 +65,10 @@ export class HistoryComponent implements OnInit, OnDestroy {
     public options: any = {
         chart: {
           type: 'line',
-          height: 700
+          height: 700,
+          zoomType: 'x',
+          panning: true,
+          panKey: 'shift'
         },
         title: {
           text: 'Heizungswerte'
@@ -113,10 +130,20 @@ export class HistoryComponent implements OnInit, OnDestroy {
      * Aktualisiert die Daten für die angezeigten Highchart-Axen
      */
     private refreshHighchartData(that: any) {
-        this.convertDataAndAddToHighchrtSeries(that, that.data[HeaterDataType.Abgastemperatur].data, 0);
-        this.convertDataAndAddToHighchrtSeries(that, that.data[HeaterDataType.Puffer_oben].data, 1);
-        this.convertDataAndAddToHighchrtSeries(that, that.data[HeaterDataType.Puffer_unten].data, 2);
-        this.convertDataAndAddToHighchrtSeries(that, that.data[HeaterDataType.Aussentemperatur].data, 3);
+        if (typeof that.dataService.dataHashTable[HeaterDataType.Abgastemperatur] != "undefined") {
+            this.convertDataAndAddToHighchrtSeries(that, that.dataService.dataHashTable[HeaterDataType.Abgastemperatur].data, 0, that.showedDaysCount);
+        }
+        if (typeof that.dataService.dataHashTable[HeaterDataType.Puffer_oben] != "undefined") {
+            this.convertDataAndAddToHighchrtSeries(that, that.dataService.dataHashTable[HeaterDataType.Puffer_oben].data, 1, that.showedDaysCount);
+        }
+        if (typeof that.dataService.dataHashTable[HeaterDataType.Puffer_unten] != "undefined") {
+            this.convertDataAndAddToHighchrtSeries(that, that.dataService.dataHashTable[HeaterDataType.Puffer_unten].data, 2, that.showedDaysCount);
+        }
+        if (typeof that.dataService.dataHashTable[HeaterDataType.Aussentemperatur] != "undefined") {
+            this.convertDataAndAddToHighchrtSeries(that, that.dataService.dataHashTable[HeaterDataType.Aussentemperatur].data, 3, that.showedDaysCount);
+        }
+
+        Highcharts.chart('container', that.options);
     }
     // #endregion
 
@@ -127,21 +154,39 @@ export class HistoryComponent implements OnInit, OnDestroy {
      * @param that Das This vom Parent
      * @param dataArray Der Array mit den Daten
      * @param seriesIndex Der Index von der Datenserie, in welche die Daten eingefügt werden sollen
+     * @param dayCount Die Anzahl an Tagen, welche Rückwirkend in das Diagramm eingefügt werden soll
      */
-    private convertDataAndAddToHighchrtSeries(that: any, dataArray: Array<any>, seriesIndex: number): void {
+    private convertDataAndAddToHighchrtSeries(that: any, dataArray: Array<any>, seriesIndex: number, dayCount: number): void {
         if (that.options.series.length > seriesIndex - 1) {
             let series = that.options.series[seriesIndex];
-            series.length = 0;
+            series.data.length = 0;
 
             dataArray.forEach((dataPoint) => {
-                let highChartPoint = [];
+                // @ts-ignore
+                if (new Date() - dataPoint.timestamp < dayCount * 1000 * 60 * 60 * 24) {
+                    let highChartPoint = [];
 
-                highChartPoint.push(dataPoint.timestamp.getTime());
-                highChartPoint.push(dataPoint.value);
+                    highChartPoint.push(dataPoint.timestamp.getTime());
+                    highChartPoint.push(dataPoint.value);
 
-                series.data.push(highChartPoint);
+                    series.data.push(highChartPoint);
+                }
             });
         }
+    }
+    // #endregion
+
+    // #region changeShownDaysAndRefresh
+    /**
+     * Ändert die Tage welche im Highchart angezeigt werden
+     * 
+     * @param dayCount Die Anzahl der Tage welche angezeigt werden
+     */
+    public changeShownDaysAndRefresh(dayCount: number): void {
+        this.showedDaysCount = dayCount;
+        let that = this;
+
+        this.refreshHighchartData(that);
     }
     // #endregion
 }

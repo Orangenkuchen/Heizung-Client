@@ -2,6 +2,8 @@ import { Injectable } from '@angular/core';
 import { WebsocketService } from '../WebSocket/web-socket.service';
 import { ServerToClientCommandType } from 'src/app/entities/socket/serverToClient/ServerToClientCommandType';
 import { HeaterDataType } from 'src/app/entities/HeaterDataType';
+import * as Enumerable from 'linq';
+import * as Moment from 'moment-timezone';
 
 export interface DataPoint {
     description: string;
@@ -54,7 +56,23 @@ export class DataService {
      * Die aktuelle Außentemperatur
      */
     public currentOutsideTemperature: DataPoint = { description: null, timestamp: null, unit: null, value: null };
+    // #endregion
 
+    // #region totalRunTimeHour
+    /**
+     * Die insgesamte Anzahl an Betriebsstunden
+     */
+    public totalRunTimeHour: DataPoint = { description: null, timestamp: null, unit: null, value: null };
+    // #endregion
+
+    // #region totalRunTimeByDay
+    /**
+     * Die Betriebsstunden pro Tag
+     */
+    public totalRunTimeByDay: Array<number> = new Array<number>();
+    // #endregion
+
+    // #region websocketService
     private websocketService: WebsocketService;
     // #endregion
 
@@ -79,7 +97,7 @@ export class DataService {
 
         setTimeout(() => {
             this.reqeustData(30);
-        }, 100);
+        }, 1000);
 
         setInterval(() => {
             this.reqeustData(30);
@@ -124,12 +142,46 @@ export class DataService {
     
             that.dataHashTable = serverToClientCommand.dataObject;
 
-
             that.fillCurrentValue(that.dataHashTable, HeaterDataType.Heizstatus, that.currentState);
             that.fillCurrentValue(that.dataHashTable, HeaterDataType.Abgastemperatur, that.currentExhaustTemperature);
             that.fillCurrentValue(that.dataHashTable, HeaterDataType.Puffer_oben, that.currentBufferTopTemperature);
             that.fillCurrentValue(that.dataHashTable, HeaterDataType.Puffer_unten, that.currentBufferBottomTemperature);
             that.fillCurrentValue(that.dataHashTable, HeaterDataType.Aussentemperatur, that.currentOutsideTemperature);
+            that.fillCurrentValue(that.dataHashTable, HeaterDataType.Betriebsstunden, that.totalRunTimeHour);
+
+            if (typeof that.dataHashTable[HeaterDataType.Betriebsstunden] != "undefined") {
+                let minValueOfDay: number = null;
+                let maxValueOfDay: number = 0;
+                let lastDateTime: Date = null;
+                
+                that.totalRunTimeByDay.lnegth = 0;
+
+                that.dataHashTable[HeaterDataType.Betriebsstunden].data.forEach((element) => {
+                    if (lastDateTime == null) {
+                        lastDateTime = element.timestamp;
+                    }
+
+                    if (minValueOfDay == null) {
+                        minValueOfDay = element.value;
+                    }
+                    else if (element.value < minValueOfDay) {
+                        minValueOfDay = element.value;
+                    }
+                    if (element.value > maxValueOfDay) {
+                        maxValueOfDay = element.value;
+                    }
+
+                    if (lastDateTime.getDate() != element.timestamp.getDate()) {
+                        let moment = new Moment(element.timestamp).startOf('day');
+
+                        that.totalRunTimeByDay.push({ "date": moment, "runHours": maxValueOfDay - minValueOfDay, "absoluteHours": maxValueOfDay });
+                    }
+
+                    lastDateTime = element.timestamp;
+                });
+            }
+
+            that.onDataChangedCallbacks.forEach((callback) => callback());
         }
     }
     // #endregion

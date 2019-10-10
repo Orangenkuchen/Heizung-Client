@@ -6,12 +6,16 @@ import { AppComponent } from './app.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { GaugeModule } from 'angular-gauge';
 import { HistoryComponent } from './history/history.component';
+import { MenuComponent } from './menu/menu.component';
+import { RunTimeComponent } from './run-time/run-time.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     DashboardComponent,
     HistoryComponent,
+    MenuComponent,
+    RunTimeComponent,
   ],
   imports: [
     BrowserModule,

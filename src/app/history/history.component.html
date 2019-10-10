@@ -1,1 +1,13 @@
-<p>history works!</p>
+<h1 style="margin-left: 10px;">Verlauf</h1>
+<div style="margin-left: 10px;">
+    <button (click)="changeShownDaysAndRefresh(1)"
+            style="width: 150px; 
+                   height: 60px; ">1 Tag</button>
+    <button (click)="changeShownDaysAndRefresh(7)"
+            style="width: 150px; 
+                   height: 60px; ">7 Tage</button>
+    <button (click)="changeShownDaysAndRefresh(31)"
+            style="width: 150px; 
+                   height: 60px; ">Monat</button>
+</div>
+<div id="container"></div>

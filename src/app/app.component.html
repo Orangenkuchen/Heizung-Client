@@ -30,8 +30,17 @@
   .spacer {
     flex: 1;
   }
+  
+  html {
+    background-color: #005e48;
+    color: white;
+  }
 
   .toolbar {
+    position: relative;
+    top: 0;
+    left: 0;
+    right: 0;
     height: 60px;
     display: flex;
     align-items: center;
@@ -293,7 +302,8 @@
 
 <!-- Toolbar -->
 <div class="toolbar" role="banner">
-  <a>
+  <a routerLink="/menu"
+     style="cursor: pointer;">
     <img
       width="20"
       alt="Menü"
@@ -301,5 +311,10 @@
     />
   </a>
 </div>
-
-<router-outlet></router-outlet>
+<div style="position: relative; 
+            top: 20px ;
+            left: 0;
+            right: 0;
+            bottom: 0;">
+    <router-outlet></router-outlet>
+</div>
