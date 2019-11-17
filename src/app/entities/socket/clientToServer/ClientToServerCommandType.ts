@@ -7,5 +7,15 @@ export enum ClientToServerCommandType {
     /**
      * Command zum Einstellen davon, welche Werte geloggt werden sollen
      */
-    SetLoggingStateCommand = 2
+    SetLoggingStateCommand = 2,
+
+    /**
+     * Command zum Anfordern der Konfiguration von der Mail-Benachrichtigung
+     */
+    RequestMailNotifierConfigCommand = 3,
+
+    /**
+     * Command zum Speichern von der Mail-Benachrichtigung-Konfig
+     */
+    SaveMailNotifierConfigCommand = 4
 }

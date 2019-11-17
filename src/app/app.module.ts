@@ -8,6 +8,7 @@ import { GaugeModule } from 'angular-gauge';
 import { HistoryComponent } from './history/history.component';
 import { MenuComponent } from './menu/menu.component';
 import { RunTimeComponent } from './run-time/run-time.component';
+import { MailNotifierSettingsComponent } from './mail-notifier-settings/mail-notifier-settings.component';
 
 @NgModule({
   declarations: [
@@ -16,6 +17,7 @@ import { RunTimeComponent } from './run-time/run-time.component';
     HistoryComponent,
     MenuComponent,
     RunTimeComponent,
+    MailNotifierSettingsComponent,
   ],
   imports: [
     BrowserModule,

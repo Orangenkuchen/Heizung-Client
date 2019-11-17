@@ -150,13 +150,35 @@ export class DataService {
             that.fillCurrentValue(that.dataHashTable, HeaterDataType.Betriebsstunden, that.totalRunTimeHour);
 
             if (typeof that.dataHashTable[HeaterDataType.Betriebsstunden] != "undefined") {
-                let minValueOfDay: number = null;
-                let maxValueOfDay: number = 0;
-                let lastDateTime: Date = null;
-                
-                that.totalRunTimeByDay.lnegth = 0;
+                let groupArray = Enumerable.from(that.dataHashTable[HeaterDataType.Betriebsstunden].data)
+                // @ts-ignore
+                                           .where((element) => { return element.value != null })
+                // @ts-ignore
+                                           .groupBy((dataPoint) => { return new Moment(dataPoint.timestamp).format("YYYY.MM.DD"); });
 
-                that.dataHashTable[HeaterDataType.Betriebsstunden].data.forEach((element) => {
+                that.totalRunTimeByDay.length = 0;
+                let maxLastDayValue: number;
+
+                groupArray.forEach((element) => {
+                    let valueDayLinqList = element.select((dataPoint) => { return dataPoint.value });
+
+                    let minDayValue = valueDayLinqList.min();
+                    let maxDayValue = valueDayLinqList.max();
+
+                    if (maxLastDayValue != null) {
+                        if (maxLastDayValue != minDayValue) {
+                            minDayValue = maxLastDayValue;
+                        }
+                    }
+
+                    // @ts-ignore
+                    let date = new Moment(element.firstOrDefault().timestamp);
+                    
+                    that.totalRunTimeByDay.push({ "date": date, "runHours": maxDayValue - minDayValue, "absoluteHours": maxDayValue });
+                    maxLastDayValue = maxDayValue;
+                });
+
+                /*that.dataHashTable[HeaterDataType.Betriebsstunden].data.forEach((element) => {
                     if (lastDateTime == null) {
                         lastDateTime = element.timestamp;
                     }
@@ -174,11 +196,13 @@ export class DataService {
                     if (lastDateTime.getDate() != element.timestamp.getDate()) {
                         let moment = new Moment(element.timestamp).startOf('day');
 
-                        that.totalRunTimeByDay.push({ "date": moment, "runHours": maxValueOfDay - minValueOfDay, "absoluteHours": maxValueOfDay });
+                        that.totalRunTimeByDay.push({ "date": moment, "runHours"{ "date": moment, "runHours": maxValueOfDay - minValueOfDay, "absoluteHours": maxValueOfDay }: maxValueOfDay - minValueOfDay, "absoluteHours": maxValueOfDay });
+                        minValueOfDay = null;
+                        maxValueOfDay = 0;
                     }
 
                     lastDateTime = element.timestamp;
-                });
+                });*/
             }
 
             that.onDataChangedCallbacks.forEach((callback) => callback());
