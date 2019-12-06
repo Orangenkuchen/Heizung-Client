@@ -5,7 +5,7 @@ import { ServerToClientCommandType } from 'src/app/entities/socket/serverToClien
 
 
 export interface MailConfig {
-    mail: string;
+    Mail: string;
 }
 
 export interface NotifierConfig {
@@ -17,7 +17,7 @@ export interface NotifierConfig {
     providedIn: 'root'
 })
 export class MailService {
-    // #region websocketService
+    // #region fields
     /**
      * Websocket zum kommunizieren mit dem Server
      */
@@ -40,6 +40,8 @@ export class MailService {
      */
     public constructor(websocketService: WebsocketService) {
         this.websocketService = websocketService;
+        this.onMailConfigReceivedArray = new Array<(config: NotifierConfig) => void>();
+        this.onMailConfigSavedArray = Array<() => void>();
 
         websocketService.webSocket.subscribe((messageEvent: MessageEvent) => this.handleOnWebSocketMessage(this, messageEvent));
     }
@@ -79,7 +81,7 @@ export class MailService {
      */
     public requestMailConfig(handleOnConfigReceived: (config: NotifierConfig) => void) {
         let command: any = {
-            commandType: 2,
+            commandType: 3,
             dataObject: null
         };
 
@@ -98,7 +100,7 @@ export class MailService {
      */
     public saveMailConfig(notifierConfig: NotifierConfig, hanldeOnConifgSaved: () => void) {
         let command: any = {
-            commandType: 3,
+            commandType: 4,
             dataObject: notifierConfig
         };
 

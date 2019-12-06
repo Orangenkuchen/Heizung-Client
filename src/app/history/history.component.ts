@@ -142,6 +142,45 @@ export class HistoryComponent implements OnInit, OnDestroy {
         if (typeof that.dataService.dataHashTable[HeaterDataType.Aussentemperatur] != "undefined") {
             this.convertDataAndAddToHighchrtSeries(that, that.dataService.dataHashTable[HeaterDataType.Aussentemperatur].data, 3, that.showedDaysCount);
         }
+        if (typeof that.dataService.dataHashTable[HeaterDataType.Heizstatus] != "undefined") {
+            let zones = new Array<{ value: number, color: string}>();
+
+            that.dataService.dataHashTable[HeaterDataType.Heizstatus].data.forEach((data) => {
+                let color: string;
+
+                switch(data.value) {
+                    case 5:
+                        // Feuer aus
+                        color = "#0088cc";
+                        break;
+                    case 4:
+                        // Feuererhaltung
+                        color = "#FF0000";
+                        break;
+                    case 3:
+                        // Feuer an
+                        color = "#fa9200";
+                        break;
+                    case 6:
+                        // Tür auf
+                        color = "#FF00FF";
+                        break;
+                    case 2:
+                        // Anheizen
+                        color = "#00fa9a";
+                        break;
+                }
+
+                zones.push({
+                    value: data.timestamp.getTime(),
+                    color: color
+                });
+                data.timestamp.getTime();
+            });
+
+            that.options.series[0].zoneAxis = "x";
+            that.options.series[0].zones = zones;
+        }
 
         Highcharts.chart('container', that.options);
     }

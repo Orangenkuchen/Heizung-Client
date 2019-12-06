@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { MailService, NotifierConfig } from '../services/MailService/mail.service';
+import { MailService, NotifierConfig, MailConfig } from '../services/MailService/mail.service';
 
 @Component({
   selector: 'app-mail-notifier-settings',
@@ -34,7 +34,7 @@ export class MailNotifierSettingsComponent implements OnInit {
     // #region saveMails
     private saveMails() {
         this.mailService.saveMailConfig(this.notifierConfig, () => {
-            
+            alert("Erfolgreich gespeichert");
         });
     }
     // #endregion
@@ -43,10 +43,25 @@ export class MailNotifierSettingsComponent implements OnInit {
     /**
      * Fügt eine neue Mail in die Konfig ein
      */
-    private addEmptyMail() {
+    public addEmptyMail() {
         if (this.notifierConfig != null) {
             if (typeof this.notifierConfig.mailConfigs === "object") {
-                this.notifierConfig.mailConfigs.push({ mail: "" });
+                this.notifierConfig.mailConfigs.push({ Mail: "" });
+            }
+        }
+    }
+
+    // #endregion
+
+    // #region removeMail
+    /**
+     * Entfernt eine Mail aus der Konfig
+     */
+    public removeMail(mailConfigToRemove: MailConfig) {
+        if (this.notifierConfig != null) {
+            if (typeof this.notifierConfig.mailConfigs === "object") {
+                let index = this.notifierConfig.mailConfigs.indexOf(mailConfigToRemove);
+                this.notifierConfig.mailConfigs.splice(index, 1);
             }
         }
     }
