@@ -13,7 +13,7 @@
                 <input type="text" ng-model="mailConfig.mail" required />
             </div>
         </div>
-        <button [click]="addEmptyMail()">Neue Adresse hinzufügen</button>
-        <button [click]="saveMails()">Speichern</button>
+        <button (click)="addEmptyMail()">Neue Adresse hinzufügen</button>
+        <button (click)="saveMails()">Speichern</button>
     </div>
 </div>

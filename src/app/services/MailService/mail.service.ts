@@ -3,9 +3,6 @@ import { WebsocketService } from '../WebSocket/web-socket.service';
 import { ServerToClientCommand } from 'src/app/entities/socket/serverToClient/ServerToClientCommand';
 import { ServerToClientCommandType } from 'src/app/entities/socket/serverToClient/ServerToClientCommandType';
 
-@Injectable({
-    providedIn: 'root'
-})
 
 export interface MailConfig {
     mail: string;
@@ -16,6 +13,9 @@ export interface NotifierConfig {
     mailConfigs: Array<MailConfig>;
 }
 
+@Injectable({
+    providedIn: 'root'
+})
 export class MailService {
     // #region websocketService
     /**
