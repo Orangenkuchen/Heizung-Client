@@ -144,6 +144,8 @@ export class HistoryComponent implements OnInit, OnDestroy {
         }
         if (typeof that.dataService.dataHashTable[HeaterDataType.Heizstatus] != "undefined") {
             let zones = new Array<{ value: number, color: string}>();
+            let lastColor: string;
+            let lastDateValue: number;
 
             that.dataService.dataHashTable[HeaterDataType.Heizstatus].data.forEach((data) => {
                 let color: string;
@@ -171,11 +173,23 @@ export class HistoryComponent implements OnInit, OnDestroy {
                         break;
                 }
 
-                zones.push({
-                    value: data.timestamp.getTime(),
-                    color: color
-                });
-                data.timestamp.getTime();
+                if (color != lastColor) {
+                    if (typeof lastColor == "string" && typeof lastDateValue == "number") {
+                      zones.push({
+                          value: lastDateValue,
+                          color: lastColor
+                      });
+                    }
+
+                    zones.push({
+                        value: data.timestamp.getTime(),
+                        color: color
+                    });
+                    data.timestamp.getTime();
+                }
+
+                lastColor = color;
+                lastDateValue = data.timestamp.getTime();
             });
 
             that.options.series[0].zoneAxis = "x";
