@@ -10,7 +10,39 @@ export interface DataPoint {
     timestamp: Date; 
     value: Number;
     unit: string;
-  }
+}
+
+
+export interface HeaterDataHashMap {
+    [id: number]: HeaterData;
+}
+
+export interface HeaterData {
+    /**
+     * Die Id vom Heizwerttyp
+     */
+    valueTypeId: number;
+    
+    /**
+     * Die Beschreibung vom Heizwert
+     */
+    description: string;
+
+    /**
+     * Gibt an ob der Heizwert gelogged wird
+     */
+    isLogged: Boolean;
+
+    /**
+     * Die Einheit des Werts
+     */
+    unit: String;
+
+    /**
+     * Die Daten für den Heizwert
+     */
+    data: Array<{timestamp: Date, value: number}>;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -80,7 +112,17 @@ export class DataService {
     /**
      * Hashtable mit den Werten von der Heizung
      */
-    public dataHashTable: { [heaterType: number]: any };
+    public dataHashTable: HeaterDataHashMap;
+
+    /**
+     * Das Datum von den Erhalten Daten (min)
+     */
+    public receivedDataFromDate: Date;
+
+    /**
+     * Das Datum von den Erhalten Daten (max)
+     */
+    public receivedDataToDate: Date;
     // #endregion
 
     // #region ctor
@@ -96,12 +138,12 @@ export class DataService {
         websocketService.webSocket.subscribe((messageEvent: MessageEvent) => this.handleOnWebSocketMessage(this, messageEvent));
 
         setTimeout(() => {
-            this.reqeustData(30);
+            this.reqeustData(1);
         }, 1000);
 
-        setInterval(() => {
+        setTimeout(() => {
             this.reqeustData(30);
-        }, 1000 * 60 * 15);
+        }, 3000);
     }
     // #endregion
 
@@ -138,9 +180,11 @@ export class DataService {
         let serverToClientCommand = JSON.parse(messageEvent.data);
 
         if (serverToClientCommand.commandType == ServerToClientCommandType.AllDataCommand) {
-            that.convertRevicedData(serverToClientCommand.dataObject);
+            that.convertRevicedData(serverToClientCommand.dataObject.heaterDataHashMap);
     
-            that.dataHashTable = serverToClientCommand.dataObject;
+            that.receivedDataFromDate = serverToClientCommand.dataObject.fromDate;
+            that.receivedDataToDate = serverToClientCommand.dataObject.toDate;
+            that.dataHashTable = serverToClientCommand.dataObject.heaterDataHashMap;
 
             that.fillCurrentValue(that.dataHashTable, HeaterDataType.Heizstatus, that.currentState);
             that.fillCurrentValue(that.dataHashTable, HeaterDataType.Abgastemperatur, that.currentExhaustTemperature);
@@ -252,7 +296,7 @@ export class DataService {
      * @param dataType Der Typ vom Messwert
      * @param outputVariable Die Vairable, in die der aktuellste Wert geschrieben werden soll
      */
-    private fillCurrentValue(dataValues: {[dataType: number]: any}, dataType: HeaterDataType, outputVariable): void {
+    private fillCurrentValue(dataValues: HeaterDataHashMap, dataType: HeaterDataType, outputVariable): void {
         if (typeof dataValues[dataType] === "object") {
             let heaterStateData = dataValues[dataType];
 
