@@ -1,0 +1,23 @@
+<h1 style="margin-left: 10px;">Werteübersicht</h1>
+<div style="padding: 5px; ">
+    <table style="width: 100%;
+                  max-width: 500px;
+                  padding: 10px; ">
+        <thead>
+            <tr>
+                <th><p>Beschreibung</p></th>
+                <th><p>Zeitpunkt</p></th>
+                <th><p>Wert</p></th>
+                <th><p>Einheit</p></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let dataPoint of dataService.rawDataArray">
+                <td><p>{{dataPoint.description}}</p></td>
+                <td><p>{{dataPoint.data[0].timestamp}}</p></td>
+                <td><p>{{dataPoint.data[0].value}}</p></td>
+                <td><p>{{dataPoint.unit}}</p></td>
+            </tr>
+        </tbody>
+    </table>
+</div>

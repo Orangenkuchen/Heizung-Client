@@ -17,5 +17,10 @@ export enum ClientToServerCommandType {
     /**
      * Command zum Speichern von der Mail-Benachrichtigung-Konfig
      */
-    SaveMailNotifierConfigCommand = 4
+    SaveMailNotifierConfigCommand = 4,
+
+    /**
+     * Command zum ermitteln vder neusten Daten
+     */
+    RequestNewestDataCommand = 5
 }

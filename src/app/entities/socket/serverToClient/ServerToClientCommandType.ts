@@ -3,5 +3,7 @@ export enum ServerToClientCommandType {
 
     FeedbackCommand = 2,
 
-    NotifierConfigCommand = 3
+    NotifierConfigCommand = 3,
+
+    NewestDataCommand = 4
 }

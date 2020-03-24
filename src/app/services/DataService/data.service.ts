@@ -4,6 +4,8 @@ import { ServerToClientCommandType } from 'src/app/entities/socket/serverToClien
 import { HeaterDataType } from 'src/app/entities/HeaterDataType';
 import * as Enumerable from 'linq';
 import * as Moment from 'moment-timezone';
+import { ClientToServerCommandType } from 'src/app/entities/socket/clientToServer/ClientToServerCommandType';
+import { ApiService, ValueDescriptionHashTable } from '../ApiService/api.service';
 
 export interface DataPoint {
     description: string;
@@ -53,6 +55,25 @@ export class DataService {
      * Array mit Callbacks welche ausgeführt werden, wenn die Daten vom Service aktualisiert wurden
      */
     private onDataChangedCallbacks = new Array<() => void>();
+
+    /**
+     * Promise für die Wertbeschreibungen
+     */
+    private valueDescriptionHashTablePromise: Promise<ValueDescriptionHashTable>;
+    // #endregion
+
+    // #region rawDataHashTable
+    /**
+     * Hashtable mit den Rohdaten aus der Heizung
+     */
+    public rawDataHashTable: any = {};
+    // #endregion
+
+    // #region rawDataArray
+    /**
+     * Array mit den Rohdaten aus der Heizung
+     */
+    public rawDataArray: Array<any> = new Array<any>();
     // #endregion
 
     // #region currentState
@@ -131,19 +152,25 @@ export class DataService {
      * 
      * @param websocketService Service für Websocketkommunikation
      */
-    public constructor(websocketService: WebsocketService) {
+    public constructor(websocketService: WebsocketService, apiService: ApiService) {
         this.dataHashTable = {};
         this.websocketService = websocketService;
 
         websocketService.webSocket.subscribe((messageEvent: MessageEvent) => this.handleOnWebSocketMessage(this, messageEvent));
 
         setTimeout(() => {
-            this.reqeustData(1);
+            this.requestCurrentData();
         }, 1000);
 
         setTimeout(() => {
             this.reqeustData(30);
         }, 3000);
+
+        this.valueDescriptionHashTablePromise = new Promise<ValueDescriptionHashTable>((resolve, reject) => {
+            apiService.GetValueDescriptions().subscribe((valueDescriptionHashTable) => {
+                resolve(valueDescriptionHashTable);
+            });
+        });
     }
     // #endregion
 
@@ -185,13 +212,6 @@ export class DataService {
             that.receivedDataFromDate = serverToClientCommand.dataObject.fromDate;
             that.receivedDataToDate = serverToClientCommand.dataObject.toDate;
             that.dataHashTable = serverToClientCommand.dataObject.heaterDataHashMap;
-
-            that.fillCurrentValue(that.dataHashTable, HeaterDataType.Heizstatus, that.currentState);
-            that.fillCurrentValue(that.dataHashTable, HeaterDataType.Abgastemperatur, that.currentExhaustTemperature);
-            that.fillCurrentValue(that.dataHashTable, HeaterDataType.Puffer_oben, that.currentBufferTopTemperature);
-            that.fillCurrentValue(that.dataHashTable, HeaterDataType.Puffer_unten, that.currentBufferBottomTemperature);
-            that.fillCurrentValue(that.dataHashTable, HeaterDataType.Aussentemperatur, that.currentOutsideTemperature);
-            that.fillCurrentValue(that.dataHashTable, HeaterDataType.Betriebsstunden, that.totalRunTimeHour);
 
             if (typeof that.dataHashTable[HeaterDataType.Betriebsstunden] != "undefined") {
                 let groupArray = Enumerable.from(that.dataHashTable[HeaterDataType.Betriebsstunden].data)
@@ -250,6 +270,51 @@ export class DataService {
             }
 
             that.onDataChangedCallbacks.forEach((callback) => callback());
+        } else if (serverToClientCommand.commandType == ServerToClientCommandType.NewestDataCommand) {
+            for(let paramName in serverToClientCommand.dataObject) {
+                if (typeof that.rawDataHashTable[paramName] == "undefined") {
+                    that.rawDataHashTable[paramName] = serverToClientCommand.dataObject[paramName];
+                    that.rawDataArray.push(serverToClientCommand.dataObject[paramName])
+                } else {
+                    let arrayIndex = that.rawDataArray.indexOf(that.rawDataHashTable[paramName]);
+
+                    that.rawDataHashTable[paramName] = serverToClientCommand.dataObject[paramName];
+                    that.rawDataArray[arrayIndex] = serverToClientCommand.dataObject[paramName];
+                }
+            }
+
+            that.valueDescriptionHashTablePromise.then((valueDescriptionHashTable) => {
+                for(let valueTypeId in serverToClientCommand.dataObject) {
+                    let dataValue = serverToClientCommand.dataObject[valueTypeId];
+
+                    let timestamp = new Date(dataValue.data[0].timestamp);
+                    switch(valueTypeId) {
+                        case HeaterDataType.Heizstatus.toString():
+                            that.fillCurrentValue(valueDescriptionHashTable, HeaterDataType.Heizstatus, dataValue.data[0].value, timestamp, that.currentState);
+                            break;
+
+                        case HeaterDataType.Abgastemperatur.toString():
+                            that.fillCurrentValue(valueDescriptionHashTable, HeaterDataType.Abgastemperatur, that.currentExhaustTemperature);
+                            break;
+
+                        case HeaterDataType.Puffer_oben.toString():
+                            that.fillCurrentValue(valueDescriptionHashTable, HeaterDataType.Puffer_oben, that.currentBufferTopTemperature);
+                            break;
+
+                        case HeaterDataType.Puffer_unten.toString():
+                            that.fillCurrentValue(valueDescriptionHashTable, HeaterDataType.Puffer_unten, that.currentBufferBottomTemperature);
+                            break;
+
+                        case HeaterDataType.Aussentemperatur.toString():
+                            that.fillCurrentValue(valueDescriptionHashTable, HeaterDataType.Aussentemperatur, that.currentOutsideTemperature);
+                            break;
+
+                        case HeaterDataType.Betriebsstunden.toString():
+                            that.fillCurrentValue(valueDescriptionHashTable, HeaterDataType.Betriebsstunden, that.totalRunTimeHour);
+                            break;
+                    }
+                }
+            });
         }
     }
     // #endregion
@@ -296,18 +361,14 @@ export class DataService {
      * @param dataType Der Typ vom Messwert
      * @param outputVariable Die Vairable, in die der aktuellste Wert geschrieben werden soll
      */
-    private fillCurrentValue(dataValues: HeaterDataHashMap, dataType: HeaterDataType, outputVariable): void {
-        if (typeof dataValues[dataType] === "object") {
-            let heaterStateData = dataValues[dataType];
+    private fillCurrentValue(valueDescriptionHashTable: ValueDescriptionHashTable, dataType: HeaterDataType, newValue: any, timestamp: string | Date, outputVariable): void {
+        if (typeof valueDescriptionHashTable[dataType] === "object") {
+            let valueDescription = valueDescriptionHashTable[dataType];
 
-            if (heaterStateData.data.length > 0) {
-                let latestValue = heaterStateData.data[heaterStateData.data.length - 1];
-
-                outputVariable.description = heaterStateData.description;
-                outputVariable.timestamp = latestValue.timestamp;
-                outputVariable.unit = heaterStateData.unit;
-                outputVariable.value = latestValue.value;
-            }
+            outputVariable.description = valueDescription.Description;
+            outputVariable.timestamp = timestamp;
+            outputVariable.unit = valueDescription.Unit;
+            outputVariable.value = newValue;
         }
     }
     // #endregion
@@ -323,11 +384,25 @@ export class DataService {
         let toDate = new Date();
 
         let command: any = {
-            commandType: 1,
+            commandType: ClientToServerCommandType.RequestAllDataCommand,
             dataObject: {
                 fromDate: formDate,
                 toDate: toDate
             }
+        };
+
+        this.websocketService.webSocket.next(command);
+    }
+    // #endregion
+
+    // #region requestCurrentData
+    /**
+     * Fragt die aktuellen Daten beim Server an
+     */
+    public requestCurrentData() {
+
+        let command: any = {
+            commandType: ClientToServerCommandType.RequestNewestDataCommand
         };
 
         this.websocketService.webSocket.next(command);
