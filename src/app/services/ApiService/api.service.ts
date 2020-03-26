@@ -17,7 +17,6 @@ export interface ValueDescriptionHashTable {
   providedIn: 'root'
 })
 export class ApiService {
-    //private apiURL: string = "http://***REMOVED***:8080";
     private apiURL: string = "http://***REMOVED***:8080";
 
     constructor(private httpClient: HttpClient) { }

@@ -294,23 +294,23 @@ export class DataService {
                             break;
 
                         case HeaterDataType.Abgastemperatur.toString():
-                            that.fillCurrentValue(valueDescriptionHashTable, HeaterDataType.Abgastemperatur, that.currentExhaustTemperature);
+                            that.fillCurrentValue(valueDescriptionHashTable, HeaterDataType.Abgastemperatur, dataValue.data[0].value, timestamp, that.currentExhaustTemperature);
                             break;
 
                         case HeaterDataType.Puffer_oben.toString():
-                            that.fillCurrentValue(valueDescriptionHashTable, HeaterDataType.Puffer_oben, that.currentBufferTopTemperature);
+                            that.fillCurrentValue(valueDescriptionHashTable, HeaterDataType.Puffer_oben, dataValue.data[0].value, timestamp, that.currentBufferTopTemperature);
                             break;
 
                         case HeaterDataType.Puffer_unten.toString():
-                            that.fillCurrentValue(valueDescriptionHashTable, HeaterDataType.Puffer_unten, that.currentBufferBottomTemperature);
+                            that.fillCurrentValue(valueDescriptionHashTable, HeaterDataType.Puffer_unten, dataValue.data[0].value, timestamp, that.currentBufferBottomTemperature);
                             break;
 
                         case HeaterDataType.Aussentemperatur.toString():
-                            that.fillCurrentValue(valueDescriptionHashTable, HeaterDataType.Aussentemperatur, that.currentOutsideTemperature);
+                            that.fillCurrentValue(valueDescriptionHashTable, HeaterDataType.Aussentemperatur, dataValue.data[0].value, timestamp, that.currentOutsideTemperature);
                             break;
 
                         case HeaterDataType.Betriebsstunden.toString():
-                            that.fillCurrentValue(valueDescriptionHashTable, HeaterDataType.Betriebsstunden, that.totalRunTimeHour);
+                            that.fillCurrentValue(valueDescriptionHashTable, HeaterDataType.Betriebsstunden, dataValue.data[0].value, timestamp, that.totalRunTimeHour);
                             break;
                     }
                 }
