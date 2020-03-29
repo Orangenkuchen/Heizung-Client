@@ -9,13 +9,14 @@
                     margin-top: 40px; 
                     font-size: 22px; 
                     font-weight: bold;">
-            <div *ngSwitchDefault>{{dataService.description}} {{dataService.currentState}}</div>
+            <div *ngSwitchDefault>{{dataService.currentState.value}}</div>
             <div *ngSwitchCase="3">Feuer an</div>
             <div *ngSwitchCase="5">Feuer aus</div>
             <div *ngSwitchCase="6">Tür auf</div>
             <div *ngSwitchCase="2">Anheizen</div>
             <div *ngSwitchCase="56">Vorbelüften</div>
             <div *ngSwitchCase="4">Feuererhaltung</div>
+            <div *ngSwitchCase="35">Zünden warten</div>
         </div>
     </div>
     <div class="Panel">

@@ -31,10 +31,27 @@ export class HistoryComponent implements OnInit, OnDestroy {
      * Die Anzahl der Tage welche angezeigt werden soll
      */
     private showedDaysCount: number;
+
+    /**
+     * Der Contianer vom Diagramm
+     */
+    private chartContainerElement: HTMLDivElement;
+
+    /**
+     * Highchart welches die Historiendaten anzeigt
+     */
+    private historyHighChart: Highcharts.Chart;
     // #endregion
 
-    constructor(private dataService: DataService) { }
+    // #region ctor
+    /**
+     * Initialisiert die Klasse
+     * @param dataService Service welche die aktuellen Daten beinhaltet
+     */
+    constructor(private dataService: DataService) {}
+    // #endregion
 
+    // #region ngOnInit
     ngOnInit() {
         window["moment"] = Moment;
 
@@ -51,12 +68,31 @@ export class HistoryComponent implements OnInit, OnDestroy {
             }
         });
 
-        Highcharts.chart('container', this.options);
+        this.chartContainerElement = document.getElementById("container").parentElement as HTMLDivElement;
+        
+        this.historyHighChart = Highcharts.chart('container', this.options);
     }
+    // #endregion
 
+    // #region ngOnDestroy
     ngOnDestroy() {
         this.unsubscribeArray.forEach((unsubscribe) => unsubscribe());
     }
+    // #endregion
+
+    // #region isFullscreenActive
+    /**
+     * Gibt an, ob Vollbild aktiv ist
+     */
+    public isFullscreenActive: boolean = false;
+    // #endregion
+
+    // #region isIOSFullScreen
+    /**
+     * Workaround für den Fall, das Safari Mobil verwendet wird
+     */
+    public isIOSFullScreen: boolean = false;
+    // #endregion
 
     // #region config
     /**
@@ -64,57 +100,58 @@ export class HistoryComponent implements OnInit, OnDestroy {
      */
     public options: any = {
         chart: {
-          type: 'line',
-          height: 700,
-          zoomType: 'x',
-          panning: true,
-          panKey: 'shift'
+            type: 'line',
+            //height: 375,
+            //height: '100%',
+            zoomType: 'x',
+            panning: true,
+            panKey: 'shift'
         },
         title: {
-          text: 'Heizungswerte'
+            text: 'Heizungswerte'
         },
         credits: {
-          enabled: true
+            enabled: true
         },
         tooltip: {
-          formatter: function() {
-            return `${Math.round(this.y.toFixed(2) * 10) / 10} °C ${Highcharts.dateFormat('%e %b %y %H:%M:%S', this.x)}`;
-          }
+            formatter: function() {
+                return `${Math.round(this.y.toFixed(2) * 10) / 10} °C ${Highcharts.dateFormat('%e %b %y %H:%M:%S', this.x)}`;
+            }
         },
         xAxis: {
-          type: 'datetime',
-          labels: {
-            formatter: function() {
-              return Highcharts.dateFormat('%e %b %y', this.value);
+            type: 'datetime',
+            labels: {
+                formatter: function() {
+                return Highcharts.dateFormat('%e %b %y', this.value);
+                }
             }
-          }
         },
         yAxis: {
-          title: {
-            text: '°C'
-          }
+            title: {
+                text: '°C'
+            }
         },
         series: [
-          {
-            name: 'Abgastemperatur',
-            turboThreshold: 500000,
-            data: []
-          },
-          {
-            name: 'Puffer oben',
-            turboThreshold: 500000,
-            data: []
-          },
-          {
-            name: 'Puffer unten',
-            turboThreshold: 500000,
-            data: []
-          },
-          {
-            name: 'Außentemperatur',
-            turboThreshold: 500000,
-            data: []
-          },
+            {
+                name: 'Abgastemperatur',
+                turboThreshold: 500000,
+                data: []
+            },
+            {
+                name: 'Puffer oben',
+                turboThreshold: 500000,
+                data: []
+            },
+            {
+                name: 'Puffer unten',
+                turboThreshold: 500000,
+                data: []
+            },
+            {
+                name: 'Außentemperatur',
+                turboThreshold: 500000,
+                data: []
+            },
         ],
         plotOptions: {
             series: {
@@ -240,6 +277,68 @@ export class HistoryComponent implements OnInit, OnDestroy {
         let that = this;
 
         this.refreshHighchartData(that);
+    }
+    // #endregion
+
+    // #region showFullScreen
+    /**
+     * Welchselt auf den Vollbild um
+     */
+    public showFullScreen(): void {
+        if (this.chartContainerElement.requestFullscreen) {
+            this.chartContainerElement.requestFullscreen();
+        // @ts-ignore
+        } else if (this.chartContainerElement.mozRequestFullScreen) { /* Firefox */
+            // @ts-ignore
+            this.chartContainerElement.mozRequestFullScreen();
+        // @ts-ignore
+        } else if (this.chartContainerElement.webkitRequestFullscreen) { /* Chrome, Safari and Opera */
+            // @ts-ignore
+            this.chartContainerElement.webkitRequestFullscreen();
+        // @ts-ignore
+        } else if (this.chartContainerElement.msRequestFullscreen) { /* IE/Edge */
+            // @ts-ignore
+            this.chartContainerElement.msRequestFullscreen();
+        } else {
+            this.isIOSFullScreen = true;
+
+            setTimeout(() => {
+                this.historyHighChart = Highcharts.chart('container', this.options);
+            }, 0);
+        }
+
+        this.isFullscreenActive = true;
+    }
+    // #endregion
+
+    // #region closeFullScreen
+    /**
+     * Schließt das Vollbild
+     */
+    public closeFullScreen(): void {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        // @ts-ignore
+        } else if (document.mozCancelFullScreen) { /* Firefox */
+            // @ts-ignore
+            document.mozCancelFullScreen();
+        // @ts-ignore
+        } else if (document.webkitExitFullscreen) { /* Chrome, Safari and Opera */
+            // @ts-ignore
+            document.webkitExitFullscreen();
+        // @ts-ignore
+        } else if (document.msExitFullscreen) { /* IE/Edge */
+            // @ts-ignore
+            document.msExitFullscreen();
+        } else {
+            this.isIOSFullScreen = false;
+
+            setTimeout(() => {
+                this.historyHighChart = Highcharts.chart('container', this.options);
+            }, 0);
+        }
+
+        this.isFullscreenActive = false;
     }
     // #endregion
 }

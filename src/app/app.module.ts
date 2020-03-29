@@ -14,23 +14,23 @@ import { MailNotifierSettingsComponent } from './mail-notifier-settings/mail-not
 import { ValueOverviewComponent } from './value-overview/value-overview.component';
 
 @NgModule({
-  declarations: [
-    AppComponent,
-    DashboardComponent,
-    HistoryComponent,
-    MenuComponent,
-    RunTimeComponent,
-    MailNotifierSettingsComponent,
-    ValueOverviewComponent,
-  ],
-  imports: [
-    BrowserModule,
-    AppRoutingModule,
-    HttpClientModule,
-    FormsModule,
-    GaugeModule.forRoot()
-  ],
-  providers: [],
-  bootstrap: [AppComponent]
+    declarations: [
+        AppComponent,
+        DashboardComponent,
+        HistoryComponent,
+        MenuComponent,
+        RunTimeComponent,
+        MailNotifierSettingsComponent,
+        ValueOverviewComponent,
+    ],
+    imports: [
+        BrowserModule,
+        AppRoutingModule,
+        HttpClientModule,
+        FormsModule,
+        GaugeModule.forRoot()
+    ],
+    providers: [],
+    bootstrap: [AppComponent]
 })
 export class AppModule { }

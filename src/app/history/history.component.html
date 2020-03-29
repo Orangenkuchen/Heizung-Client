@@ -1,13 +1,29 @@
 <h1 style="margin-left: 10px;">Verlauf</h1>
 <div style="margin-left: 10px;">
     <button (click)="changeShownDaysAndRefresh(1)"
-            style="width: 150px; 
-                   height: 60px; ">1 Tag</button>
+            class="historyButton">1 Tag</button>
     <button (click)="changeShownDaysAndRefresh(7)"
-            style="width: 150px; 
-                   height: 60px; ">7 Tage</button>
+            class="historyButton">7 Tage</button>
     <button (click)="changeShownDaysAndRefresh(31)"
-            style="width: 150px; 
-                   height: 60px; ">Monat</button>
+            class="historyButton">Monat</button>
+    <button (click)="showFullScreen()"
+            class="historyButton">Vollbild</button>
 </div>
-<div id="container"></div>
+<div style="position: absolute;
+            top: 150px;
+            left: 0;
+            right: 0;
+            bottom: 0;"
+            [class.IOSFullScreen]="isIOSFullScreen">
+        <div style="position: relative;
+                    height: 100%;
+                    width: 100%;"
+             id="container"></div>
+        <button *ngIf="isFullscreenActive"
+                (click)="closeFullScreen()"
+                class="historyButton"
+                style="position: absolute;
+                       top: 5px;
+                       right: 5px;
+                       margin: 0;">Schließen</button>
+</div>
