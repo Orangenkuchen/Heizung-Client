@@ -35,4 +35,5 @@ export enum HeaterDataType {
     Kollektortemp = 29,
     Betriebsstunden = 30,
     Fehler = 99,
+    TuerOffenSeitFuerAus = 1000
 }

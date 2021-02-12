@@ -118,6 +118,13 @@ export class DataService {
     public totalRunTimeHour: DataPoint = { description: null, timestamp: null, unit: null, value: null };
     // #endregion
 
+    // #region doorOpenTimeSiceFireOut
+    /**
+     * Die Anzahl der Sekunden, welche die Tür geöffnet wurde seit dem 'Feuer Aus'. Wird beim Anheizen zurückgesetzt
+     */
+    public doorOpenTimeSiceFireOut: DataPoint = { description: null, timestamp: null, unit: null, value: null };
+    // #endregion
+
     // #region totalRunTimeByDay
     /**
      * Die Betriebsstunden pro Tag
@@ -311,6 +318,10 @@ export class DataService {
 
                         case HeaterDataType.Betriebsstunden.toString():
                             that.fillCurrentValue(valueDescriptionHashTable, HeaterDataType.Betriebsstunden, dataValue.data[0].value, timestamp, that.totalRunTimeHour);
+                            break;
+
+                        case HeaterDataType.TuerOffenSeitFuerAus.toString():
+                            that.fillCurrentValue(valueDescriptionHashTable, HeaterDataType.TuerOffenSeitFuerAus, dataValue.data[0].value, timestamp, that.doorOpenTimeSiceFireOut);
                             break;
                     }
                 }
