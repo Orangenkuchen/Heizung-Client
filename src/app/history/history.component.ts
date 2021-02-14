@@ -48,7 +48,8 @@ export class HistoryComponent implements OnInit, OnDestroy {
      * Initialisiert die Klasse
      * @param dataService Service welche die aktuellen Daten beinhaltet
      */
-    constructor(private dataService: DataService) {}
+    constructor(private dataService: DataService) {
+    };
     // #endregion
 
     // #region ngOnInit
@@ -114,9 +115,7 @@ export class HistoryComponent implements OnInit, OnDestroy {
             enabled: true
         },
         tooltip: {
-            formatter: function() {
-                return `${Math.round(this.y.toFixed(2) * 10) / 10} °C ${Highcharts.dateFormat('%e %b %y %H:%M:%S', this.x)}`;
-            }
+            formatter: this.formatTooltip
         },
         xAxis: {
             type: 'datetime',
@@ -162,6 +161,24 @@ export class HistoryComponent implements OnInit, OnDestroy {
     }
     // #endregion
 
+    // #region formatTooltip
+    /**
+     * Wird aufgerufen, wenn im Diagramm über einen Datenpunkt gefahren wird
+     */
+    private formatTooltip() {
+        let that: any = this;
+
+        let tooltip = `${Math.round(that.y.toFixed(2) * 10) / 10} °C ${Highcharts.dateFormat('%e %b %y %H:%M:%S', that.x)}`
+
+        if (typeof that.point.status == "number" ||
+            typeof that.point.status == "string") {
+            tooltip += ` (${that.point.status})`;
+        }
+
+        return tooltip;
+    }
+    // #endregion
+
     // #region refreshHighchartData
     /**
      * Aktualisiert die Daten für die angezeigten Highchart-Axen
@@ -180,57 +197,49 @@ export class HistoryComponent implements OnInit, OnDestroy {
             this.convertDataAndAddToHighchrtSeries(that, that.dataService.dataHashTable[HeaterDataType.Aussentemperatur].data, 3, that.showedDaysCount);
         }
         if (typeof that.dataService.dataHashTable[HeaterDataType.Heizstatus] != "undefined") {
-            let zones = new Array<{ value: number, color: string}>();
-            let lastColor: string;
-            let lastDateValue: number;
+            if (that.options.series.length > 0) {
+                let exaustTemperatureSeries: Array<{ x: any, y: any, status?: number|string }> = that.options.series[0].data;
 
-            that.dataService.dataHashTable[HeaterDataType.Heizstatus].data.forEach((data) => {
-                let color: string;
+                for (let i in exaustTemperatureSeries) {
+                    let exaustTemperatureDataPoint = exaustTemperatureSeries[i];
 
-                switch(data.value) {
-                    case 5:
-                        // Feuer aus
-                        color = "#0088cc";
-                        break;
-                    case 4:
-                        // Feuererhaltung
-                        color = "#FF0000";
-                        break;
-                    case 3:
-                        // Feuer an
-                        color = "#fa9200";
-                        break;
-                    case 6:
-                        // Tür auf
-                        color = "#FF00FF";
-                        break;
-                    case 2:
-                        // Anheizen
-                        color = "#00fa9a";
-                        break;
-                }
+                    for (let j in that.dataService.dataHashTable[HeaterDataType.Heizstatus].data) {
+                        let statusDataPoint: {timestamp: Date, value: number} = that.dataService.dataHashTable[HeaterDataType.Heizstatus].data[j];
 
-                if (color != lastColor) {
-                    if (typeof lastColor == "string" && typeof lastDateValue == "number") {
-                      zones.push({
-                          value: lastDateValue,
-                          color: lastColor
-                      });
+                        if (exaustTemperatureDataPoint.x - statusDataPoint.timestamp.getTime() < 3 * 1000) {
+
+                            switch(statusDataPoint.value) {
+                                case 2:
+                                    exaustTemperatureDataPoint.status = "Anheizen";
+                                    break;
+                                case 3:
+                                    exaustTemperatureDataPoint.status = "Heizen";
+                                    break;
+                                case 4:
+                                    exaustTemperatureDataPoint.status = "Feuererhaltung";
+                                    break;
+                                case 5:
+                                    exaustTemperatureDataPoint.status = "Feuer Aus";
+                                    break;
+                                case 9:
+                                    exaustTemperatureDataPoint.status = "Zünden";
+                                    break;
+                                case 35:
+                                    exaustTemperatureDataPoint.status = "Zünden warten";
+                                    break;
+                                case 56:
+                                    exaustTemperatureDataPoint.status = "Vorbelüften";
+                                    break;
+                                default:
+                                    exaustTemperatureDataPoint.status = statusDataPoint.value;
+                                    break;
+                            }
+
+                            break;
+                        }
                     }
-
-                    zones.push({
-                        value: data.timestamp.getTime(),
-                        color: color
-                    });
-                    data.timestamp.getTime();
                 }
-
-                lastColor = color;
-                lastDateValue = data.timestamp.getTime();
-            });
-
-            that.options.series[0].zoneAxis = "x";
-            that.options.series[0].zones = zones;
+            }
         }
 
         Highcharts.chart('container', that.options);
@@ -254,10 +263,10 @@ export class HistoryComponent implements OnInit, OnDestroy {
             dataArray.forEach((dataPoint) => {
                 // @ts-ignore
                 if (new Date() - dataPoint.timestamp < dayCount * 1000 * 60 * 60 * 24) {
-                    let highChartPoint = [];
-
-                    highChartPoint.push(dataPoint.timestamp.getTime());
-                    highChartPoint.push(dataPoint.value);
+                    let highChartPoint = {
+                        x: dataPoint.timestamp.getTime(),
+                        y: dataPoint.value
+                    };
 
                     series.data.push(highChartPoint);
                 }
