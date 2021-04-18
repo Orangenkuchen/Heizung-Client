@@ -1,11 +1,22 @@
 <h1 style="margin-left: 10px;">Verlauf</h1>
 <div style="margin-left: 10px;">
-    <button (click)="changeShownDaysAndRefresh(1)"
+    <button (click)="changeDisplayedWeek(-1)"
+            class="historyButton
+                   arrowButton"><</button>
+    <div style="height: 30px; 
+                margin: 5px; 
+                float: left; ">
+        <p style="margin: 0; line-height: 35px;">KW {{currentWeekNumber}}</p>
+    </div>
+    <button (click)="changeDisplayedWeek(1)"
+            class="arrowButton
+                   historyButton">></button>
+    <!--<button (click)="changeShownDaysAndRefresh(1)"
             class="historyButton">1 Tag</button>
     <button (click)="changeShownDaysAndRefresh(7)"
             class="historyButton">7 Tage</button>
     <button (click)="changeShownDaysAndRefresh(31)"
-            class="historyButton">Monat</button>
+            class="historyButton">Monat</button>-->
     <button (click)="showFullScreen()"
             class="historyButton">Vollbild</button>
 </div>

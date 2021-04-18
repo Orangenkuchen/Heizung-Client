@@ -1,8 +1,11 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { DataService } from '../services/DataService/data.service';
+import { Component, OnInit, OnDestroy, ViewEncapsulation } from '@angular/core';
 import * as Highcharts from 'highcharts';
-import * as Moment from 'moment-timezone';
+import * as moment from 'moment';
+import { Logger } from 'serilogger';
 import { HeaterDataType } from '../entities/HeaterDataType';
+import { CurrentDataService, HeaterDataHashMap } from '../services/CurrentDataService/current-data.service';
+import { HeaterDataService } from '../services/HeaterData/heater-data.service';
+import { LoggerService } from '../services/Logger/logger.service';
 
 declare var require: any;
 let Boost = require('highcharts/modules/boost');
@@ -17,7 +20,8 @@ noData(Highcharts);
 @Component({
     selector: 'app-history',
     templateUrl: './history.component.html',
-    styleUrls: ['./history.component.less']
+    styleUrls: ['./history.component.less'],
+    encapsulation: ViewEncapsulation.None
 })
 export class HistoryComponent implements OnInit, OnDestroy {
 
@@ -41,28 +45,45 @@ export class HistoryComponent implements OnInit, OnDestroy {
      * Highchart welches die Historiendaten anzeigt
      */
     private historyHighChart: Highcharts.Chart;
+
+    /**
+     * Service für Heizungsdaten
+     */
+    private readonly heaterDataService: HeaterDataService;
+
+    /**
+     * Das Datum, welches zum Anzeigen der KW verwendet wird
+     */
+    private currentMoment: moment.Moment;
+
+    /**
+     * Service für Lognachrichten
+     */
+     private logger: Logger;
     // #endregion
 
     // #region ctor
     /**
      * Initialisiert die Klasse
-     * @param dataService Service welche die aktuellen Daten beinhaltet
+     * 
+     * @param loggerService Service für Lognachrichten
+     * @param heaterDataService Service für Heizungsdaten
      */
-    constructor(private dataService: DataService) {
-    };
+    public constructor(loggerService: LoggerService, heaterDataService: HeaterDataService) 
+    {
+        this.logger = loggerService.Logger;
+        this.heaterDataService = heaterDataService;
+
+        this.logger.debug("History-Component initialisiert (Konstruktor)");
+    }
     // #endregion
 
     // #region ngOnInit
-    ngOnInit() {
-        window["moment"] = Moment;
-
-        let that = this;
-        this.showedDaysCount = 1;
-        this.refreshHighchartData(that);
-
-        let unsubscribe = this.dataService.addOnDataChangeCallback(() => this.refreshHighchartData(that));
-        this.unsubscribeArray.push(unsubscribe);
-
+    /**
+     * Diese Funtion wird von Angular beim Intitieren der Componente ausgeführt
+     */
+    public ngOnInit(): void 
+    {
         Highcharts.setOptions({
             time: {
                 timezone: 'Europe/Berlin'
@@ -70,14 +91,23 @@ export class HistoryComponent implements OnInit, OnDestroy {
         });
 
         this.chartContainerElement = document.getElementById("container").parentElement as HTMLDivElement;
-        
         this.historyHighChart = Highcharts.chart('container', this.options);
+
+        this.currentMoment = moment();
+        this.changeDisplayedWeek(0);
+
+        this.logger.debug("History-Component initialisiert (Angular ngOnInit)");
     }
     // #endregion
 
     // #region ngOnDestroy
-    ngOnDestroy() {
+    /**
+     * Diese Funtion wird von Angular beim Abbauen der Componente ausgeführt
+     */
+    public ngOnDestroy(): void {
         this.unsubscribeArray.forEach((unsubscribe) => unsubscribe());
+
+        this.logger.debug("History-Component abgebaut (Destructor)");
     }
     // #endregion
 
@@ -88,6 +118,13 @@ export class HistoryComponent implements OnInit, OnDestroy {
     public isFullscreenActive: boolean = false;
     // #endregion
 
+    // #region currentWeekNumber
+    /**
+     * Die aktuell ausgewählte KW
+     */
+    public currentWeekNumber: Number;
+    // #endregion
+
     // #region isIOSFullScreen
     /**
      * Workaround für den Fall, das Safari Mobil verwendet wird
@@ -95,7 +132,7 @@ export class HistoryComponent implements OnInit, OnDestroy {
     public isIOSFullScreen: boolean = false;
     // #endregion
 
-    // #region config
+    // #region options
     /**
      * Die Konfiguration für das Highchart
      */
@@ -161,6 +198,32 @@ export class HistoryComponent implements OnInit, OnDestroy {
     }
     // #endregion
 
+    // #region changeDisplayedWeek
+    /**
+     * Ändert die angezeigte Woche
+     * @param weekToAdd Die Anzahl an Wochen, welche addiert werden sollen
+     */
+    public changeDisplayedWeek(weekToAdd: number): void
+    {
+        this.currentMoment = this.currentMoment.add(weekToAdd, "week");
+
+        this.currentWeekNumber = this.currentMoment.isoWeek();
+
+        this.historyHighChart.showLoading("Lädt...");
+        this.heaterDataService.Get(
+            this.currentMoment.startOf("isoWeek").toDate(), 
+            this.currentMoment.endOf("isoWeek").toDate())
+            .subscribe((heaterDataHashMap) =>
+            {
+                this.refreshHighchartData(heaterDataHashMap);
+                this.historyHighChart.hideLoading();
+            }, (error) =>
+            {
+                this.logger.error(error, "Fehler beim ermitteln der Historiendaten");
+            });
+    }
+    // #endregion
+
     // #region formatTooltip
     /**
      * Wird aufgerufen, wenn im Diagramm über einen Datenpunkt gefahren wird
@@ -182,31 +245,36 @@ export class HistoryComponent implements OnInit, OnDestroy {
     // #region refreshHighchartData
     /**
      * Aktualisiert die Daten für die angezeigten Highchart-Axen
+     * 
+     * @param heaterDataHashMap Die Daten, welche angezeigt werden sollen
      */
-    private refreshHighchartData(that: any) {
-        if (typeof that.dataService.dataHashTable[HeaterDataType.Abgastemperatur] != "undefined") {
-            this.convertDataAndAddToHighchrtSeries(that, that.dataService.dataHashTable[HeaterDataType.Abgastemperatur].data, 0, that.showedDaysCount);
+    private refreshHighchartData(heaterDataHashMap: HeaterDataHashMap)
+    {
+        this.logger.info("History-Component: refreshHighchartData wurde aufgerufen");
+
+        if (typeof heaterDataHashMap[HeaterDataType.Abgastemperatur] != "undefined") {
+            this.convertDataAndAddToHighchrtSeries(heaterDataHashMap[HeaterDataType.Abgastemperatur].data, 0, this.showedDaysCount);
         }
-        if (typeof that.dataService.dataHashTable[HeaterDataType.Puffer_oben] != "undefined") {
-            this.convertDataAndAddToHighchrtSeries(that, that.dataService.dataHashTable[HeaterDataType.Puffer_oben].data, 1, that.showedDaysCount);
+        if (typeof heaterDataHashMap[HeaterDataType.Puffer_oben] != "undefined") {
+            this.convertDataAndAddToHighchrtSeries(heaterDataHashMap[HeaterDataType.Puffer_oben].data, 1, this.showedDaysCount);
         }
-        if (typeof that.dataService.dataHashTable[HeaterDataType.Puffer_unten] != "undefined") {
-            this.convertDataAndAddToHighchrtSeries(that, that.dataService.dataHashTable[HeaterDataType.Puffer_unten].data, 2, that.showedDaysCount);
+        if (typeof heaterDataHashMap[HeaterDataType.Puffer_unten] != "undefined") {
+            this.convertDataAndAddToHighchrtSeries(heaterDataHashMap[HeaterDataType.Puffer_unten].data, 2, this.showedDaysCount);
         }
-        if (typeof that.dataService.dataHashTable[HeaterDataType.Aussentemperatur] != "undefined") {
-            this.convertDataAndAddToHighchrtSeries(that, that.dataService.dataHashTable[HeaterDataType.Aussentemperatur].data, 3, that.showedDaysCount);
+        if (typeof heaterDataHashMap[HeaterDataType.Aussentemperatur] != "undefined") {
+            this.convertDataAndAddToHighchrtSeries(heaterDataHashMap[HeaterDataType.Aussentemperatur].data, 3, this.showedDaysCount);
         }
-        if (typeof that.dataService.dataHashTable[HeaterDataType.Heizstatus] != "undefined") {
-            if (that.options.series.length > 0) {
-                let exaustTemperatureSeries: Array<{ x: any, y: any, status?: number|string }> = that.options.series[0].data;
+        if (typeof heaterDataHashMap[HeaterDataType.Heizstatus] != "undefined") {
+            if (this.options.series.length > 0) {
+                let exaustTemperatureSeries: Array<{ x: any, y: any, status?: number|string }> = this.options.series[0].data;
 
                 for (let i in exaustTemperatureSeries) {
                     let exaustTemperatureDataPoint = exaustTemperatureSeries[i];
 
-                    for (let j in that.dataService.dataHashTable[HeaterDataType.Heizstatus].data) {
-                        let statusDataPoint: {timestamp: Date, value: number} = that.dataService.dataHashTable[HeaterDataType.Heizstatus].data[j];
+                    for (let j in heaterDataHashMap[HeaterDataType.Heizstatus].data) {
+                        let statusDataPoint: {timeStamp: Date, value: number} = heaterDataHashMap[HeaterDataType.Heizstatus].data[j];
 
-                        if (exaustTemperatureDataPoint.x - statusDataPoint.timestamp.getTime() < 3 * 1000) {
+                        if (exaustTemperatureDataPoint.x - new Date(statusDataPoint.timeStamp).getTime() < 3 * 1000) {
 
                             switch(statusDataPoint.value) {
                                 case 2:
@@ -242,7 +310,9 @@ export class HistoryComponent implements OnInit, OnDestroy {
             }
         }
 
-        Highcharts.chart('container', that.options);
+        this.historyHighChart.update(this.options);
+
+        this.logger.debug("History-Component: refreshHighchartData ist abgeschlossen");
     }
     // #endregion
 
@@ -255,37 +325,23 @@ export class HistoryComponent implements OnInit, OnDestroy {
      * @param seriesIndex Der Index von der Datenserie, in welche die Daten eingefügt werden sollen
      * @param dayCount Die Anzahl an Tagen, welche Rückwirkend in das Diagramm eingefügt werden soll
      */
-    private convertDataAndAddToHighchrtSeries(that: any, dataArray: Array<any>, seriesIndex: number, dayCount: number): void {
-        if (that.options.series.length > seriesIndex - 1) {
-            let series = that.options.series[seriesIndex];
+    private convertDataAndAddToHighchrtSeries(dataArray: Array<any>, seriesIndex: number, dayCount: number): void {
+        if (this.options.series.length > seriesIndex - 1) {
+            let series = this.options.series[seriesIndex];
             series.data.length = 0;
 
-            dataArray.forEach((dataPoint) => {
-                // @ts-ignore
-                if (new Date() - dataPoint.timestamp < dayCount * 1000 * 60 * 60 * 24) {
-                    let highChartPoint = {
-                        x: dataPoint.timestamp.getTime(),
-                        y: dataPoint.value
-                    };
+            dataArray.forEach((dataPoint) => 
+            {
+                let dataPointDate = new Date(dataPoint.timeStamp);
 
-                    series.data.push(highChartPoint);
-                }
+                let highChartPoint: any = {
+                    x: dataPointDate.getTime(),
+                    y: dataPoint.value
+                };
+
+                series.data.push(highChartPoint);
             });
         }
-    }
-    // #endregion
-
-    // #region changeShownDaysAndRefresh
-    /**
-     * Ändert die Tage welche im Highchart angezeigt werden
-     * 
-     * @param dayCount Die Anzahl der Tage welche angezeigt werden
-     */
-    public changeShownDaysAndRefresh(dayCount: number): void {
-        this.showedDaysCount = dayCount;
-        let that = this;
-
-        this.refreshHighchartData(that);
     }
     // #endregion
 
@@ -294,6 +350,8 @@ export class HistoryComponent implements OnInit, OnDestroy {
      * Welchselt auf den Vollbild um
      */
     public showFullScreen(): void {
+        this.logger.info("History-Component: showFullScreen wurde aufgerufen");
+
         if (this.chartContainerElement.requestFullscreen) {
             this.chartContainerElement.requestFullscreen();
         // @ts-ignore
@@ -317,6 +375,7 @@ export class HistoryComponent implements OnInit, OnDestroy {
         }
 
         this.isFullscreenActive = true;
+        this.logger.debug("History-Component: showFullScreen wurde abgeschlossen");
     }
     // #endregion
 
@@ -325,6 +384,7 @@ export class HistoryComponent implements OnInit, OnDestroy {
      * Schließt das Vollbild
      */
     public closeFullScreen(): void {
+        this.logger.info("History-Component: closeFullScreen wurde aufgerufen");
         if (document.exitFullscreen) {
             document.exitFullscreen();
         // @ts-ignore
@@ -348,6 +408,7 @@ export class HistoryComponent implements OnInit, OnDestroy {
         }
 
         this.isFullscreenActive = false;
+        this.logger.debug("History-Component: closeFullScreen wurde beendet");
     }
     // #endregion
 }

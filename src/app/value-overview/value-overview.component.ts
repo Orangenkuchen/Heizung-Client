@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { DataService } from 'src/app/services/DataService/data.service';
+import { CurrentDataService } from 'src/app/services/CurrentDataService/current-data.service';
 
 @Component({
   selector: 'app-value-overview',
@@ -8,7 +8,7 @@ import { DataService } from 'src/app/services/DataService/data.service';
 })
 export class ValueOverviewComponent implements OnInit {
 
-  constructor(public dataService: DataService) { }
+  constructor(public currentDataService: CurrentDataService) { }
 
   ngOnInit() {
   }

@@ -4,12 +4,12 @@
         <div class="Header">
             Heizungsstatus
         </div>
-        <div [ngSwitch]="dataService.currentState.value"
+        <div [ngSwitch]="currentDataService.currentState.value"
              style="text-align: center; 
                     margin-top: 40px; 
                     font-size: 22px; 
                     font-weight: bold;">
-            <div *ngSwitchDefault>{{dataService.currentState.value}}</div>
+            <div *ngSwitchDefault>{{currentDataService.currentState.value}}</div>
             <div *ngSwitchCase="3">Feuer an</div>
             <div *ngSwitchCase="5">Feuer aus</div>
             <div *ngSwitchCase="6">Tür auf</div>
@@ -28,7 +28,7 @@
             [max]="250"
             [dialStartAngle]="10"
             [dialEndAngle]="170"
-            [value]="dataService.currentExhaustTemperature.value"
+            [value]="currentDataService.currentExhaustTemperature.value"
             [label]="temperatureToString"
             [animated]="false">
         </mwl-gauge>
@@ -41,7 +41,7 @@
             [max]="90"
             [dialStartAngle]="10"
             [dialEndAngle]="170"
-            [value]="dataService.currentBufferTopTemperature.value"
+            [value]="currentDataService.currentBufferTopTemperature.value"
             [label]="temperatureToString"
             [animated]="false">
         </mwl-gauge>
@@ -54,7 +54,7 @@
             [max]="90"
             [dialStartAngle]="10"
             [dialEndAngle]="170"
-            [value]="dataService.currentBufferBottomTemperature.value"
+            [value]="currentDataService.currentBufferBottomTemperature.value"
             [label]="temperatureToString"
             [animated]="false">
         </mwl-gauge>
@@ -68,7 +68,7 @@
             [max]="50"
             [dialStartAngle]="10"
             [dialEndAngle]="170"
-            [value]="dataService.currentOutsideTemperature.value"
+            [value]="currentDataService.currentOutsideTemperature.value"
             [label]="temperatureToString"
             [animated]="false">
         </mwl-gauge>
@@ -81,7 +81,7 @@
                     margin-top: 30px; 
                     font-size: 22px; 
                     font-weight: bold;">
-            {{dataService.totalRunTimeHour.value | number}} Stunden
+            {{currentDataService.totalRunTimeHour.value | number}} Stunden
         </div>
     </div>
     <div class="Panel">
@@ -92,7 +92,7 @@
                     margin-top: 30px; 
                     font-size: 22px; 
                     font-weight: bold;">
-            {{dataService.doorOpenTimeSiceFireOut.value | number}} s
+            {{currentDataService.doorOpenTimeSiceFireOut.value | number}} s
         </div>
     </div>
 </div>

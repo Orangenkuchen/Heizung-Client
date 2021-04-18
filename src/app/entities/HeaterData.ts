@@ -1,3 +1,6 @@
+/**
+ * Daten für einen Typ von Heizungsdaten
+ */
 export interface HeaterData {
     /**
      * Die Id vom Heizwerttyp

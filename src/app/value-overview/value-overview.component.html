@@ -12,7 +12,7 @@
             </tr>
         </thead>
         <tbody>
-            <tr *ngFor="let dataPoint of dataService.rawDataArray">
+            <tr *ngFor="let dataPoint of currentDataService.rawDataArray">
                 <td><p>{{dataPoint.description}}</p></td>
                 <td><p>{{dataPoint.data[0].timestamp}}</p></td>
                 <td><p>{{dataPoint.data[0].value}}</p></td>

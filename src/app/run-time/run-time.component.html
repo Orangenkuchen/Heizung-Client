@@ -11,7 +11,7 @@
             </tr>
         </thead>
         <tbody>
-            <tr *ngFor="let dataPoint of dataService.totalRunTimeByDay">
+            <tr *ngFor="let dataPoint of currentDataService.totalRunTimeByDay">
                 <td><p>{{dataPoint.date.format("DD.MM.YYYY")}}</p></td>
                 <td><p>{{dataPoint.runHours}}</p></td>
                 <td><p>{{dataPoint.absoluteHours | number}}</p></td>

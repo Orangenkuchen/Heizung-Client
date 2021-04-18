@@ -1,12 +1,12 @@
 import { TestBed } from '@angular/core/testing';
 
-import { ApiService } from './api.service';
+import { HeaterDataService } from './heater-data.service';
 
-describe('ApiServiceService', () => {
+describe('HeaterDataService', () => {
   beforeEach(() => TestBed.configureTestingModule({}));
 
   it('should be created', () => {
-    const service: ApiService = TestBed.get(ApiService);
+    const service: HeaterDataService = TestBed.get(HeaterDataService);
     expect(service).toBeTruthy();
   });
 });
