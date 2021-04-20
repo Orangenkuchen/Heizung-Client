@@ -10,7 +10,7 @@
         <div *ngFor="let mailConfig of notifierConfig.mailConfigs">
             <div>
                 <div style="float: left;"><p>Email: </p></div>
-                <input style="margin-top: 10px; margin-left: 5px; " type="email" [(ngModel)]="mailConfig.Mail" required />
+                <input style="margin-top: 10px; margin-left: 5px; " type="email" [(ngModel)]="mailConfig.mail" required />
                 <button (click)="removeMail(mailConfig)">Entfernen</button>
                 <div style="clear: both"></div>
             </div>

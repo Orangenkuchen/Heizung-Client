@@ -5,5 +5,5 @@
     /**
      * Die Mailadresse
      */
-    Mail: string;
+    mail: string;
 }

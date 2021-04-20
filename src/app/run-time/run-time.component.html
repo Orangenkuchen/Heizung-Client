@@ -1,6 +1,7 @@
 <h1 style="margin-left: 10px;">Betriebsstunden</h1>
 <div style="padding: 5px; ">
-    <table style="width: 100%;
+    <table *ngIf="displayOperatingHouresPromise | async as displayOperatingHoures; else loading"
+           style="width: 100%;
                   max-width: 500px;
                   padding: 10px; ">
         <thead>
@@ -11,11 +12,12 @@
             </tr>
         </thead>
         <tbody>
-            <tr *ngFor="let dataPoint of currentDataService.totalRunTimeByDay">
-                <td><p>{{dataPoint.date.format("DD.MM.YYYY")}}</p></td>
-                <td><p>{{dataPoint.runHours}}</p></td>
-                <td><p>{{dataPoint.absoluteHours | number}}</p></td>
+            <tr *ngFor="let dayOperatingHoures of displayOperatingHoures">
+                <td><p>{{dayOperatingHoures.date | date:"dd.MM.yyyy"}}</p></td>
+                <td><p>{{dayOperatingHoures.houres}}</p></td>
+                <td><p>{{dayOperatingHoures.maxHoures | number}}</p></td>
             </tr>
         </tbody>
     </table>
 </div>
+<ng-template #loading>Lädt...</ng-template>

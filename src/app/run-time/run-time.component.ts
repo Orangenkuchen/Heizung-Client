@@ -1,6 +1,9 @@
 import { Component, OnInit } from '@angular/core';
+import * as moment from 'moment';
+import { Observable } from 'rxjs';
 import { Logger } from 'serilogger';
-import { CurrentDataService } from '../services/CurrentDataService/current-data.service';
+import { DayOperatingHoures } from '../entities/DayOperatingHoures';
+import { HeaterDataService } from '../services/HeaterData/heater-data.service';
 import { LoggerService } from '../services/Logger/logger.service';
 
 @Component({
@@ -14,7 +17,7 @@ export class RunTimeComponent implements OnInit
     /**
      * Servcie für die aktuellen Daten von der Heizung
      */
-    public currentDataService: CurrentDataService;
+    public heaterDataService: HeaterDataService;
 
     /**
      * Service für Lognachrichten
@@ -26,12 +29,12 @@ export class RunTimeComponent implements OnInit
     /**
      * Initialisiert die Klasse
      * 
-     * @param currentDataService Servcie für die aktuellen Daten von der Heizung
+     * @param heaterDataService Service zum Ermittlen von den Heizungsdaten von der API
      * @param loggerService Service für Lognachrichten
      */
-    public constructor(currentDataService: CurrentDataService, loggerService: LoggerService)
+    public constructor(heaterDataService: HeaterDataService, loggerService: LoggerService)
     {
-        this.currentDataService = currentDataService;
+        this.heaterDataService = heaterDataService;
         this.logger = loggerService.Logger;
 
         this.logger.debug("Run-Time-Component initialisiert (Konstruktor)");
@@ -42,8 +45,22 @@ export class RunTimeComponent implements OnInit
     /**
      * Diese Funtion wird von Angular beim Intitieren der Componente ausgeführt
      */
-    public ngOnInit(): void {
+    public ngOnInit(): void 
+    {
+        let currentMoment = moment();
+        let to = currentMoment.toDate();
+        let from = currentMoment.add(-1, 'month').toDate();
+        
+        this.logger.info("Ermittelt die Betriebstunden im Zeitraum von {0} bis {1}", from, to);
+        this.displayOperatingHouresPromise = this.heaterDataService.GetOperatingHoures(from, to);
         this.logger.debug("Run-Time initialisiert (Angular ngOnInit)");
     }
     // #endregion
+
+    // #region displayOperatingHouresPromise
+    /**
+     * Der Array der Betriebsstunden, welcher aktuell angezeigt wird
+     */
+     public displayOperatingHouresPromise: Observable<Array<DayOperatingHoures>>;
+     // #endregion
 }

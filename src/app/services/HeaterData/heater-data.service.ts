@@ -8,6 +8,7 @@ import { Logger } from 'serilogger';
 import { LoggerService } from '../Logger/logger.service';
 import { HubConnection, HubConnectionBuilder } from '@aspnet/signalr'
 import { HeaterDataHashMap } from '../CurrentDataService/current-data.service';
+import { DayOperatingHoures } from 'src/app/entities/DayOperatingHoures';
 
 /**
  * Service zum Kommunizieren mit der Web-API für Heizungsdaten und SingalR-Connections
@@ -146,6 +147,32 @@ export class HeaterDataService
     }
     // #endregion
 
+    // #region GetOperatingHoures
+    /**
+     * Ermittelt die Betriebsstunden im angegebenen Zeitraum
+     * 
+     * @param fromDate Der Startzeitpunkt der Datenbeschaffung
+     * @param toDate Der Endzeitpunkt der Datenbeschaffung
+     * @returns Gibt einen Array zurück
+     */
+     public GetOperatingHoures(fromDate: Date, toDate: Date): Observable<Array<DayOperatingHoures>>  {
+        let params = new HttpParams();
+        let url = this.apiURL + "/OperatingHoures";
+
+        this.logger.verbose("HeaterDataService: GetOperatingHoures wird bei der API angefragt. (GET; URL: {url}; fromDate: {fromDate}; toDate {toDate})", url, fromDate, toDate);
+
+        // Begin assigning parameters
+        params = params.append('fromDate', fromDate.toISOString());
+        params = params.append('toDate', toDate.toISOString());
+
+        return this.httpClient.get<Array<DayOperatingHoures>>(
+            url, 
+            {
+                "params": params
+            });
+    }
+    // #endregion
+    
     // #region AddCurrentHeaterDataListeninger
     /**
      * Fügt einen Listener hinzu, welcher aufgerufen wird, wenn neue Heizungsdaten vom Server ankommen sind

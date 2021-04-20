@@ -93,7 +93,7 @@ export class MailNotifierSettingsComponent implements OnInit
 
         if (this.notifierConfig != null) {
             if (typeof this.notifierConfig.mailConfigs === "object") {
-                this.notifierConfig.mailConfigs.push({ Mail: "" });
+                this.notifierConfig.mailConfigs.push({ mail: "" });
             }
         }
 
