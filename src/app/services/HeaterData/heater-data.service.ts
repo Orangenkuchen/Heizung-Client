@@ -9,6 +9,7 @@ import { LoggerService } from '../Logger/logger.service';
 import { HubConnection, HubConnectionBuilder } from '@aspnet/signalr'
 import { HeaterDataHashMap } from '../CurrentDataService/current-data.service';
 import { DayOperatingHoures } from 'src/app/entities/DayOperatingHoures';
+import { ConfigurationService } from '../Configuration/configuration.service';
 
 /**
  * Service zum Kommunizieren mit der Web-API für Heizungsdaten und SingalR-Connections
@@ -20,14 +21,19 @@ export class HeaterDataService
 {
     // #region fields
     /**
+     * Dieser Service beinhaltet die Konfiguration von der Anwendung
+     */
+    private readonly configurationService: ConfigurationService;
+
+    /**
      * Die BasisURL von der Web-API
      */
-    private readonly apiURL: string = "http://localhost:5000/HeaterData"; //http://***REMOVED***:8080/HeaterData
+    private readonly apiURL: string;
 
     /**
      * Die BasisURL vom SignalR-Hub für Heizungsdaten
      */
-    private readonly signalRHubURL: string = "http://localhost:5000/HeaterDataHub"; //http://***REMOVED***:8080/HeaterDataHub
+    private readonly signalRHubURL: string;
 
     /**
      * Service zum ausführen von HTTP-Requests
@@ -51,11 +57,17 @@ export class HeaterDataService
      * 
      * @param httpClient Service zum ausführen von HTTP-Requests
      * @param loggerService Service für Lognachrichten
+     * @param configurationService Dieser Service beinhaltet die Konfiguration von der Anwendung
      */
     public constructor(
         httpClient: HttpClient,
-        loggerService: LoggerService)
+        loggerService: LoggerService,
+        configurationService: ConfigurationService)
     {
+        this.configurationService = configurationService;
+        this.apiURL = this.configurationService.ApiAdress + "/HeaterData";
+        this.signalRHubURL = this.configurationService.ApiAdress + "/HeaterDataHub";
+
         this.httpClient = httpClient;
         this.logger = loggerService.Logger;
 

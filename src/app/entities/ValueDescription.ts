@@ -5,17 +5,17 @@ export interface ValueDescription {
     /**
      * Die Id vom Heizungswert
      */
-    Id: number;
+    id: number;
     /**
      * Die Beschreibung des Heizungswerts
      */
-    Description: string;
+    description: string;
     /**
      * Gibt an, ob der Heizungswert geloggt wird.
      */
-    IsLogged: boolean;
+    isLogged: boolean;
     /**
      * Die Einheit von einem Heizungswert
      */
-    Unit: string;
+    unit: string;
 }

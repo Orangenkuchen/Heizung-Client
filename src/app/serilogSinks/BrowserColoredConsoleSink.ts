@@ -204,13 +204,13 @@ export const defaultConsoleSinkColors: ColoredConsoleSinkColors =
     },
     "Debug":
     {
-        levelBackgroundColor: "#000088",
-        parameterBackgroundColor: "#007700"
+        levelBackgroundColor: "#008888",
+        parameterBackgroundColor: "#007777"
     },
     "Verbose":
     {
         levelBackgroundColor: "#000088",
-        parameterBackgroundColor: "#007700"
+        parameterBackgroundColor: "#000077"
     },
     "Log":
     {

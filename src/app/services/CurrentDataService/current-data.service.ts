@@ -104,26 +104,21 @@ export class CurrentDataService implements OnDestroy {
         {
             this.dataHashTable = heaterDataHashtable;
 
-            this.valueDescriptionHashTablePromise.then((valueDescriptionHashTable) => 
+            this.rawDataArray.length = 0;
+            for (let key in heaterDataHashtable)
             {
-                for(let valueTypeId in heaterDataHashtable) {
-                    let dataValue = heaterDataHashtable[valueTypeId];
-
-                    let timestamp = new Date(dataValue.data[0].timeStamp);
-                    
-                    let heaterDataType: HeaterDataType;
-                    if (typeof HeaterDataType[dataValue.valueTypeId] === "string")
+                if (typeof heaterDataHashtable[key] !== "undefined")
+                {
+                    if (heaterDataHashtable[key] != null)
                     {
-                        this.fillCurrentValue(valueDescriptionHashTable, HeaterDataType[dataValue.valueTypeId] as unknown as HeaterDataType, dataValue.data[0].value, timestamp, this.currentState);
-                    }
-                    else
-                    {
-                        console.warn(`Der Wert '${dataValue.valueTypeId}' wurde nicht im Typ HeaterDataType gefunden`);
+                        this.rawDataArray.push(heaterDataHashtable[key]);
                     }
                 }
-            }, (error) => console.error(error));
+            }
 
-        }, (error) => console.error(error));
+            this.handleOnNewHeaterData(heaterDataHashtable);
+
+        }, (error) => this.logger.error(new Error(error), "HeaterDataService: Fehler beim Ermitteln der aktuellen Heizungsdaten"));
 
         var unsubscribe = heaterDataService.AddCurrentHeaterDataListeninger((newData) => this.handleOnNewHeaterData(newData));
         
@@ -269,38 +264,44 @@ export class CurrentDataService implements OnDestroy {
         {
             for(let valueTypeId in newHeaterDataHashMap) 
             {
-                let dataValue = newHeaterDataHashMap[valueTypeId];
-
-                let timestamp = new Date(dataValue.data[0].timeStamp);
-                switch(valueTypeId) 
+                if (typeof newHeaterDataHashMap[valueTypeId] == "object")
                 {
-                    case HeaterDataType.Heizstatus.toString():
-                        this.fillCurrentValue(valueDescriptionHashTable, HeaterDataType.Heizstatus, dataValue.data[0].value, timestamp, this.currentState);
-                        break;
+                    if (newHeaterDataHashMap[valueTypeId] != null)
+                    {
+                        let dataValue = newHeaterDataHashMap[valueTypeId];
 
-                    case HeaterDataType.Abgastemperatur.toString():
-                        this.fillCurrentValue(valueDescriptionHashTable, HeaterDataType.Abgastemperatur, dataValue.data[0].value, timestamp, this.currentExhaustTemperature);
-                        break;
+                        let timestamp = new Date(dataValue.data[0].timeStamp);
+                        switch(valueTypeId) 
+                        {
+                            case HeaterDataType.Heizstatus.toString():
+                                this.fillCurrentValue(valueDescriptionHashTable, HeaterDataType.Heizstatus, dataValue.data[0].value, timestamp, this.currentState);
+                                break;
 
-                    case HeaterDataType.Puffer_oben.toString():
-                        this.fillCurrentValue(valueDescriptionHashTable, HeaterDataType.Puffer_oben, dataValue.data[0].value, timestamp, this.currentBufferTopTemperature);
-                        break;
+                            case HeaterDataType.Abgastemperatur.toString():
+                                this.fillCurrentValue(valueDescriptionHashTable, HeaterDataType.Abgastemperatur, dataValue.data[0].value, timestamp, this.currentExhaustTemperature);
+                                break;
 
-                    case HeaterDataType.Puffer_unten.toString():
-                        this.fillCurrentValue(valueDescriptionHashTable, HeaterDataType.Puffer_unten, dataValue.data[0].value, timestamp, this.currentBufferBottomTemperature);
-                        break;
+                            case HeaterDataType.Puffer_oben.toString():
+                                this.fillCurrentValue(valueDescriptionHashTable, HeaterDataType.Puffer_oben, dataValue.data[0].value, timestamp, this.currentBufferTopTemperature);
+                                break;
 
-                    case HeaterDataType.Aussentemperatur.toString():
-                        this.fillCurrentValue(valueDescriptionHashTable, HeaterDataType.Aussentemperatur, dataValue.data[0].value, timestamp, this.currentOutsideTemperature);
-                        break;
+                            case HeaterDataType.Puffer_unten.toString():
+                                this.fillCurrentValue(valueDescriptionHashTable, HeaterDataType.Puffer_unten, dataValue.data[0].value, timestamp, this.currentBufferBottomTemperature);
+                                break;
 
-                    case HeaterDataType.Betriebsstunden.toString():
-                        this.fillCurrentValue(valueDescriptionHashTable, HeaterDataType.Betriebsstunden, dataValue.data[0].value, timestamp, this.totalRunTimeHour);
-                        break;
+                            case HeaterDataType.Aussentemperatur.toString():
+                                this.fillCurrentValue(valueDescriptionHashTable, HeaterDataType.Aussentemperatur, dataValue.data[0].value, timestamp, this.currentOutsideTemperature);
+                                break;
 
-                    case HeaterDataType.TuerOffenSeitFuerAus.toString():
-                        this.fillCurrentValue(valueDescriptionHashTable, HeaterDataType.TuerOffenSeitFuerAus, dataValue.data[0].value, timestamp, this.doorOpenTimeSiceFireOut);
-                        break;
+                            case HeaterDataType.Betriebsstunden.toString():
+                                this.fillCurrentValue(valueDescriptionHashTable, HeaterDataType.Betriebsstunden, dataValue.data[0].value, timestamp, this.totalRunTimeHour);
+                                break;
+
+                            case HeaterDataType.TuerOffenSeitFuerAus.toString():
+                                this.fillCurrentValue(valueDescriptionHashTable, HeaterDataType.TuerOffenSeitFuerAus, dataValue.data[0].value, timestamp, this.doorOpenTimeSiceFireOut);
+                                break;
+                        }
+                    }
                 }
             }
         });
@@ -349,13 +350,13 @@ export class CurrentDataService implements OnDestroy {
      * @param dataType Der Typ vom Messwert
      * @param outputVariable Die Vairable, in die der aktuellste Wert geschrieben werden soll
      */
-    private fillCurrentValue(valueDescriptionHashTable: ValueDescriptionHashTable, dataType: HeaterDataType, newValue: any, timestamp: string | Date, outputVariable): void {
+    private fillCurrentValue(valueDescriptionHashTable: ValueDescriptionHashTable, dataType: number, newValue: any, timestamp: string | Date, outputVariable): void {
         if (typeof valueDescriptionHashTable[dataType] === "object") {
             let valueDescription = valueDescriptionHashTable[dataType];
 
-            outputVariable.description = valueDescription.Description;
+            outputVariable.description = valueDescription.description;
             outputVariable.timestamp = timestamp;
-            outputVariable.unit = valueDescription.Unit;
+            outputVariable.unit = valueDescription.unit;
             outputVariable.value = newValue;
         }
     }

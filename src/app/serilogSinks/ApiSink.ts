@@ -42,9 +42,9 @@ export interface IApiLogService
     /**
      * Ermittelt den minimum Level von Lognachrichten, welche vom Server angnommen werden
      * 
-     * @returns Gibt den minimum Loglevel zurück
+     * @returns Gibt den minimum Loglevel zurück als string zurück. (Kann in LogEventLevel geparsed werden)
      */
-     GetMinimumLogLevel(): Observable<LogEventLevel>;
+     GetMinimumLogLevel(): Observable<string>;
     // #endregion
 
     // #region AddMessage
@@ -101,7 +101,7 @@ export class ApiSink implements Sink
         this.logService.GetMinimumLogLevel()
                        .subscribe((serverMinimumLogLevel) =>
         {
-            this.serverMinimumLogLevel = serverMinimumLogLevel;
+            this.serverMinimumLogLevel = LogEventLevel[serverMinimumLogLevel.toLowerCase()];
         },(error) =>
         {
             throw error;

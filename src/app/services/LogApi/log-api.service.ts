@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { LogEventLevel } from 'serilogger';
 import { IApiLogService, LogMessageOption } from 'src/app/serilogSinks/ApiSink';
+import { ConfigurationService } from '../Configuration/configuration.service';
 
 /**
  * Service zum Kommunizieren mit der Web-API für Lognachrichten
@@ -17,14 +18,19 @@ export class LogApiService implements IApiLogService
 {
     // #region fields
     /**
+     * Dieser Service beinhaltet die Konfiguration von der Anwendung
+     */
+    private readonly configurationService: ConfigurationService;
+    
+    /**
      * Die BasisURL von der Web-API
      */
-    private apiURL: string = "http://localhost:5000/Log"; //http://***REMOVED***:8080/Log
+    private readonly apiURL: string;
 
      /**
       * Service zum ausführen von HTTP-Requests
       */
-    private httpClient: HttpClient;
+    private readonly httpClient: HttpClient;
     // #endregion
 
     // #region ctor
@@ -32,10 +38,15 @@ export class LogApiService implements IApiLogService
      * Initialisiert die Klasse
      * 
      * @param httpClient Service zum ausführen von HTTP-Requests
+     * @param configurationService Dieser Service beinhaltet die Konfiguration von der Anwendung
      */
-    public constructor(httpClient: HttpClient)
+    public constructor(
+        httpClient: HttpClient,
+        configurationService: ConfigurationService)
     {
         this.httpClient = httpClient;
+        this.configurationService = configurationService;
+        this.apiURL = this.configurationService.ApiAdress + "/Log";
     }
     // #endregion
 
@@ -43,13 +54,13 @@ export class LogApiService implements IApiLogService
     /**
      * Ermittelt den minimum Level von Lognachrichten, welche vom Server angnommen werden
      * 
-     * @returns Gibt den minimum Loglevel zurück
+     * @returns Gibt den minimum Loglevel zurück als string zurück. (Kann in LogEventLevel geparsed werden)
      */
-     public GetMinimumLogLevel(): Observable<LogEventLevel> 
+     public GetMinimumLogLevel(): Observable<string> 
      {
         let url = this.apiURL + "/MinimumLevel";
         
-        return this.httpClient.get<LogEventLevel>(url);
+        return this.httpClient.get<string>(url);
     }
     // #endregion
 

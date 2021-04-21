@@ -14,7 +14,7 @@
         <tbody>
             <tr *ngFor="let dataPoint of currentDataService.rawDataArray">
                 <td><p>{{dataPoint.description}}</p></td>
-                <td><p>{{dataPoint.data[0].timestamp}}</p></td>
+                <td><p>{{dataPoint.data[0].timeStamp | date:"dd.MM.yyyy"}}</p></td>
                 <td><p>{{dataPoint.data[0].value}}</p></td>
                 <td><p>{{dataPoint.unit}}</p></td>
             </tr>
