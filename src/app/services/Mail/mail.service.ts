@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { NotifierConfig } from 'src/app/entities/NotifierConfig';
 import { Logger } from 'serilogger';
 import { LoggerService } from '../Logger/logger.service';
+import { ConfigurationService } from '../Configuration/configuration.service';
 
 /**
  * Service zum Kommunizieren mit der Web-API für Mailkonfiguration
@@ -11,22 +12,28 @@ import { LoggerService } from '../Logger/logger.service';
 @Injectable({
   providedIn: 'root'
 })
-export class MailService {
+export class MailService 
+{
     // #region fields
+    /**
+     * Dieser Service beinhaltet die Konfiguration von der Anwendung
+     */
+    private readonly configurationService: ConfigurationService;
+    
     /**
      * Die BasisURL von der Web-API
      */
-    private apiURL: string = "http://localhost:5000/Mail"; //http://***REMOVED***:8080/Mail
+    private readonly apiURL: string;
 
     /**
      * Service zum ausführen von HTTP-Requests
      */
-    private httpClient: HttpClient;
+    private readonly httpClient: HttpClient;
 
     /**
      * Service für Lognachrichten
      */
-    private logger: Logger;
+    private readonly logger: Logger;
     // #endegion
 
     // #region ctor
@@ -35,11 +42,18 @@ export class MailService {
      * 
      * @param httpClient Service zum ausführen von HTTP-Requests
      * @param loggerService Service für Lognachrichten
+     * @param configurationService Dieser Service beinhaltet die Konfiguration von der Anwendung
      */
-    public constructor(httpClient: HttpClient, loggerService: LoggerService)
+    public constructor(
+        httpClient: HttpClient, 
+        loggerService: LoggerService,
+        configurationService: ConfigurationService)
     {
         this.httpClient = httpClient;
         this.logger = loggerService.Logger;
+        
+        this.configurationService = configurationService;
+        this.apiURL = this.configurationService.ApiAdress + "/Mail";
     }
     // #endregion
 

@@ -88,11 +88,12 @@
         <div class="Header">
             Türe offen seit 'Feuer aus'
         </div>
-        <div style="text-align: center; 
+        <div *ngIf="currentDataService.doorOpenTimeSiceFireOut.value"
+             style="text-align: center; 
                     margin-top: 30px; 
                     font-size: 22px; 
                     font-weight: bold;">
-            {{currentDataService.doorOpenTimeSiceFireOut.value | number}} s
+            {{currentDataService.doorOpenTimeSiceFireOut.value.totalSeconds | number}} s
         </div>
     </div>
 </div>
