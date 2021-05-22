@@ -14,7 +14,7 @@ export class ConfigurationService
      */
     constructor() 
     {
-        this.ApiAdress = "http://***REMOVED***:8080"
+        this.ApiAdress = "http://<Ersetzten>"
     }
     // #endregion
 
