@@ -126,7 +126,7 @@ export class ApiSink implements Sink
                 let messageOptions: LogMessageOption = { Parameters: new Array<string>() };
                 for (let paramName in event.properties)
                 {
-                    messageOptions.Parameters.push(paramName, event.properties[paramName]);
+                    messageOptions.Parameters.push(event.properties[paramName]);
                 }
 
                 if (typeof event.error !== "undefined")
