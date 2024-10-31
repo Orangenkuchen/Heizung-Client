@@ -3,9 +3,9 @@ import { Logger } from 'serilogger';
 import { LoggerService } from '../services/Logger/logger.service';
 
 @Component({
-  selector: 'app-menu',
-  templateUrl: './menu.component.html',
-  styleUrls: ['./menu.component.less']
+    selector: 'app-menu',
+    templateUrl: './menu.component.html',
+    styleUrl: './menu.component.less'
 })
 export class MenuComponent implements OnInit
 {
@@ -13,7 +13,7 @@ export class MenuComponent implements OnInit
     /**
      * Service für Lognachrichten
      */
-      private logger: Logger;
+    private logger: Logger;
     // #endregion
 
     // #region ctor

@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { NotifierConfig } from 'src/app/entities/NotifierConfig';
 import { Logger } from 'serilogger';
 import { LoggerService } from '../Logger/logger.service';
 import { ConfigurationService } from '../Configuration/configuration.service';
+import { NotifierConfig } from '../../entities/NotifierConfig';
 
 /**
  * Service zum Kommunizieren mit der Web-API für Mailkonfiguration

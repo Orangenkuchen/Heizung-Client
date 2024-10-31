@@ -1,11 +1,11 @@
 import { NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
+import { RouterModule, Routes } from '@angular/router';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { HistoryComponent } from './history/history.component';
+import { MailNotifierSettingsComponent } from './mail-notifier-settings/mail-notifier-settings.component';
 import { MenuComponent } from './menu/menu.component';
 import { RunTimeComponent } from './run-time/run-time.component';
-import { ValueOverviewComponent }  from './value-overview/value-overview.component';
-import { MailNotifierSettingsComponent } from './mail-notifier-settings/mail-notifier-settings.component';
+import { ValueOverviewComponent } from './value-overview/value-overview.component';
 
 const routes: Routes = [
   { path: 'home', component: DashboardComponent },

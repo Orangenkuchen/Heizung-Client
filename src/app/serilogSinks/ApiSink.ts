@@ -98,14 +98,24 @@ export class ApiSink implements Sink
         this.logService = apiSinkOptions.apiLoggerService;
         this.clientUUId = v4();
 
+        this.serverMinimumLogLevel = LogEventLevel.information;
+
         this.logService.GetMinimumLogLevel()
                        .subscribe((serverMinimumLogLevel) =>
-        {
-            this.serverMinimumLogLevel = LogEventLevel[serverMinimumLogLevel.toLowerCase()];
-        },(error) =>
-        {
-            throw error;
-        });
+            {
+                if (typeof serverMinimumLogLevel === "number")
+                {
+                    this.serverMinimumLogLevel = serverMinimumLogLevel;
+                }
+                else if (typeof serverMinimumLogLevel === "string")
+                {
+                    this.serverMinimumLogLevel = <LogEventLevel><unknown>LogEventLevel[<any>serverMinimumLogLevel.toLowerCase()];
+                }
+            },(error) =>
+            {
+                throw error;
+            }
+        );
     }
     // #endregion
 

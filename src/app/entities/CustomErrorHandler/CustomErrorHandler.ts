@@ -1,6 +1,6 @@
 import { ErrorHandler } from "@angular/core";
 import { Logger } from "serilogger";
-import { LoggerService } from "src/app/services/Logger/logger.service";
+import { LoggerService } from "../../services/Logger/logger.service";
 
 /**
  * Klasse welche bei Angular-Fehlern das Logging über Serilog ausführt

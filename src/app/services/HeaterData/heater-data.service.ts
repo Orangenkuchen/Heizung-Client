@@ -1,15 +1,14 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { HeaterDataHashtable } from 'src/app/entities/HeaterDataHashtable';
-import { LoggingState } from 'src/app/entities/LoggingState';
-import { ValueDescriptionHashTable } from 'src/app/entities/ValueDescriptionHashTable';
 import { Logger } from 'serilogger';
 import { LoggerService } from '../Logger/logger.service';
-import { HubConnection, HubConnectionBuilder } from '@aspnet/signalr'
 import { HeaterDataHashMap } from '../CurrentDataService/current-data.service';
-import { DayOperatingHoures } from 'src/app/entities/DayOperatingHoures';
 import { ConfigurationService } from '../Configuration/configuration.service';
+import { DayOperatingHoures } from '../../entities/DayOperatingHoures';
+import { LoggingState } from '../../entities/LoggingState';
+import { ValueDescriptionHashTable } from '../../entities/ValueDescriptionHashTable';
+import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
 
 /**
  * Service zum Kommunizieren mit der Web-API für Heizungsdaten und SingalR-Connections
@@ -83,7 +82,7 @@ export class HeaterDataService
                 {
                     this.logger.info("Connection with SignalR-Hub for HeaterData established");
                 })
-            .catch(error => 
+            .catch((error: any) => 
                 {
                     this.logger.error(new Error(error), "Error while starting connection with SignalR-Hub for HeaterData: ");
                 });

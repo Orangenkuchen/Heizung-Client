@@ -4,12 +4,12 @@
         <div class="Header">
             Heizungsstatus
         </div>
-        <div [ngSwitch]="currentDataService.currentState.value"
+        <div [ngSwitch]="this.CurrentDataService.currentState.value"
              style="text-align: center; 
                     margin-top: 40px; 
                     font-size: 22px; 
                     font-weight: bold;">
-            <div *ngSwitchDefault>{{currentDataService.currentState.value}}</div>
+            <div *ngSwitchDefault>{{this.CurrentDataService.currentState.value}}</div>
             <div *ngSwitchCase="3">Feuer an</div>
             <div *ngSwitchCase="5">Feuer aus</div>
             <div *ngSwitchCase="6">Tür auf</div>
@@ -28,7 +28,7 @@
             [max]="250"
             [dialStartAngle]="10"
             [dialEndAngle]="170"
-            [value]="currentDataService.currentExhaustTemperature.value"
+            [value]="this.CurrentDataService.currentExhaustTemperature.value"
             [label]="temperatureToString"
             [animated]="false">
         </mwl-gauge>
@@ -41,7 +41,7 @@
             [max]="90"
             [dialStartAngle]="10"
             [dialEndAngle]="170"
-            [value]="currentDataService.currentBufferTopTemperature.value"
+            [value]="this.CurrentDataService.currentBufferTopTemperature.value"
             [label]="temperatureToString"
             [animated]="false">
         </mwl-gauge>
@@ -54,7 +54,7 @@
             [max]="90"
             [dialStartAngle]="10"
             [dialEndAngle]="170"
-            [value]="currentDataService.currentBufferBottomTemperature.value"
+            [value]="this.CurrentDataService.currentBufferBottomTemperature.value"
             [label]="temperatureToString"
             [animated]="false">
         </mwl-gauge>
@@ -68,7 +68,7 @@
             [max]="50"
             [dialStartAngle]="10"
             [dialEndAngle]="170"
-            [value]="currentDataService.currentOutsideTemperature.value"
+            [value]="this.CurrentDataService.currentOutsideTemperature.value"
             [label]="temperatureToString"
             [animated]="false">
         </mwl-gauge>
@@ -81,19 +81,19 @@
                     margin-top: 30px; 
                     font-size: 22px; 
                     font-weight: bold;">
-            {{currentDataService.totalRunTimeHour.value | number}} Stunden
+            {{this.CurrentDataService.totalRunTimeHour.value | number}} Stunden
         </div>
     </div>
     <div class="Panel">
         <div class="Header">
             Türe offen seit 'Feuer aus'
         </div>
-        <div *ngIf="currentDataService.doorOpenTimeSiceFireOut.value"
+        <div *ngIf="this.CurrentDataService.doorOpenTimeSiceFireOut.value"
              style="text-align: center; 
                     margin-top: 30px; 
                     font-size: 22px; 
                     font-weight: bold;">
-            {{currentDataService.doorOpenTimeSiceFireOut.value.totalSeconds | number}} s
+            {{$any(this.CurrentDataService.doorOpenTimeSiceFireOut.value).totalSeconds | number}} s
         </div>
     </div>
 </div>

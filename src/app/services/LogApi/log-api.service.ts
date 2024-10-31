@@ -2,8 +2,8 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { LogEventLevel } from 'serilogger';
-import { IApiLogService, LogMessageOption } from 'src/app/serilogSinks/ApiSink';
 import { ConfigurationService } from '../Configuration/configuration.service';
+import { IApiLogService, LogMessageOption } from '../../serilogSinks/ApiSink';
 
 /**
  * Service zum Kommunizieren mit der Web-API für Lognachrichten

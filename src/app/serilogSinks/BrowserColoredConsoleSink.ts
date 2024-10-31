@@ -260,7 +260,7 @@ export class BrowserColoredConsoleSink extends ConsoleSink
     // #endregion
 
     // #region writeToConsole
-    protected writeToConsole(
+    protected override writeToConsole(
         logMethod: (message?: any, ...properties: any[]) => void, 
         prefix: string, 
         event: LogEvent) 

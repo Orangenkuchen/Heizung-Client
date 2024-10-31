@@ -1,13 +1,13 @@
 <h1 style="margin-left: 10px;">Mail-Benachrichtigung</h1>
 <div style="padding: 5px; ">
-    <div *ngIf="notifierConfig != null">
+    <div *ngIf="this.NotifierConfig != null">
         <div>
             <div><p>Grenzwert: </p></div>
-            <input type="number" min="20" max="70" [(ngModel)]="notifierConfig.lowerThreshold" required style="float: left; margin-top: 10px; margin-right: 5px; "/>
+            <input type="number" min="20" max="70" [(ngModel)]="this.NotifierConfig.lowerThreshold" required style="float: left; margin-top: 10px; margin-right: 5px; "/>
             <div style="float: left;"><p>°C</p></div>
         </div>
         <div style="clear: both;"><p>Emails:</p></div>
-        <div *ngFor="let mailConfig of notifierConfig.mailConfigs">
+        <div *ngFor="let mailConfig of this.NotifierConfig.mailConfigs">
             <div>
                 <div style="float: left;"><p>Email: </p></div>
                 <input style="margin-top: 10px; margin-left: 5px; " type="email" [(ngModel)]="mailConfig.mail" required />

@@ -1,18 +1,14 @@
 import { Injectable, OnDestroy } from '@angular/core';
-import { ServerToClientCommandType } from 'src/app/entities/socket/serverToClient/ServerToClientCommandType';
-import { HeaterDataType } from 'src/app/entities/HeaterDataType';
-import * as Enumerable from 'linq';
-import * as Moment from 'moment-timezone';
-import { ClientToServerCommandType } from 'src/app/entities/socket/clientToServer/ClientToServerCommandType';
-import { ValueDescriptionHashTable } from 'src/app/entities/ValueDescriptionHashTable';
 import { HeaterDataService } from '../HeaterData/heater-data.service';
 import { Logger } from 'serilogger';
 import { LoggerService } from '../Logger/logger.service';
+import { ValueDescriptionHashTable } from '../../entities/ValueDescriptionHashTable';
+import { HeaterDataType } from '../../entities/HeaterDataType';
 
 export interface DataPoint {
     description: string;
     timestamp: Date; 
-    value: Number;
+    value: number;
     unit: string;
 }
 
@@ -82,12 +78,16 @@ export class CurrentDataService implements OnDestroy {
      * @param heaterDataService Service für Heizungsdaten
      * @param loggerService Service für Lognachrichten
      */
-     public constructor(
+    public constructor(
          heaterDataService: HeaterDataService,
-         loggerService: LoggerService) {
+         loggerService: LoggerService)
+    {
         this.dataHashTable = {};
         this.destroyFunctions = new Array<() => void>();
         this.logger = loggerService.Logger;
+        
+        this.receivedDataFromDate = new Date();
+        this.receivedDataToDate = new Date();
 
         this.valueDescriptionHashTablePromise = new Promise<ValueDescriptionHashTable>((resolve, reject) => 
         {
@@ -138,7 +138,7 @@ export class CurrentDataService implements OnDestroy {
             this.destroyFunctions.splice(0, 1);
         }
 
-        this.destroyFunctions = undefined;
+        this.destroyFunctions.length = 0;
     }
     // #endregion
 
@@ -160,49 +160,49 @@ export class CurrentDataService implements OnDestroy {
     /**
      * Der aktuelle Status von der Heizung
      */
-    public currentState: DataPoint = { description: null, timestamp: null, unit: null, value: null };
+    public currentState: DataPoint = { description: "", timestamp: new Date(), unit: "", value: 0 };
     // #endregion
 
     // #region currentExhaustTemperature
     /**
      * Die aktuelle Temperatur vom Abgas
      */
-    public currentExhaustTemperature: DataPoint = { description: null, timestamp: null, unit: null, value: null };
+    public currentExhaustTemperature: DataPoint = { description: "", timestamp: new Date(), unit: "", value: 0 };
     // #endregion
 
     // #region currentBufferTopTemperature
     /**
      * Die aktuelle Temperatur im Puffer oben
      */
-    public currentBufferTopTemperature: DataPoint = { description: null, timestamp: null, unit: null, value: null };
+    public currentBufferTopTemperature: DataPoint = { description: "", timestamp: new Date(), unit: "", value: 0 };
     // #endregion
 
     // #region currentBufferBottomTemperature
     /**
      * Die aktuelle Temperatur im Puffer unten
      */
-    public currentBufferBottomTemperature: DataPoint = { description: null, timestamp: null, unit: null, value: null };
+    public currentBufferBottomTemperature: DataPoint = { description: "", timestamp: new Date(), unit: "", value: 0 };
     // #endregion
 
     // #region currentOutsideTemperature
     /**
      * Die aktuelle Außentemperatur
      */
-    public currentOutsideTemperature: DataPoint = { description: null, timestamp: null, unit: null, value: null };
+    public currentOutsideTemperature: DataPoint = { description: "", timestamp: new Date(), unit: "", value: 0 };
     // #endregion
 
     // #region totalRunTimeHour
     /**
      * Die insgesamte Anzahl an Betriebsstunden
      */
-    public totalRunTimeHour: DataPoint = { description: null, timestamp: null, unit: null, value: null };
+    public totalRunTimeHour: DataPoint = { description: "", timestamp: new Date(), unit: "", value: 0 };
     // #endregion
 
     // #region doorOpenTimeSiceFireOut
     /**
      * Die Anzahl der Sekunden, welche die Tür geöffnet wurde seit dem 'Feuer Aus'. Wird beim Anheizen zurückgesetzt
      */
-    public doorOpenTimeSiceFireOut: DataPoint = { description: null, timestamp: null, unit: null, value: null };
+    public doorOpenTimeSiceFireOut: DataPoint = { description: "", timestamp: new Date(), unit: "", value: 0 };
     // #endregion
 
     // #region totalRunTimeByDay
@@ -318,10 +318,10 @@ export class CurrentDataService implements OnDestroy {
         for(let heaterTypeId in dataObject) {
             let heaterType = dataObject[heaterTypeId];
 
-            let dataWithGaps = [];
+            let dataWithGaps = Array<any>();
             let lastDate: Date;
 
-            heaterType.data.forEach((dataPoint) => {
+            heaterType.data.forEach((dataPoint: any) => {
             dataPoint.timestamp = new Date(dataPoint.timestamp);
 
             if (lastDate != null) {
@@ -350,7 +350,7 @@ export class CurrentDataService implements OnDestroy {
      * @param dataType Der Typ vom Messwert
      * @param outputVariable Die Vairable, in die der aktuellste Wert geschrieben werden soll
      */
-    private fillCurrentValue(valueDescriptionHashTable: ValueDescriptionHashTable, dataType: number, newValue: any, timestamp: string | Date, outputVariable): void {
+    private fillCurrentValue(valueDescriptionHashTable: ValueDescriptionHashTable, dataType: number, newValue: any, timestamp: string | Date, outputVariable: any): void {
         if (typeof valueDescriptionHashTable[dataType] === "object") {
             let valueDescription = valueDescriptionHashTable[dataType];
 

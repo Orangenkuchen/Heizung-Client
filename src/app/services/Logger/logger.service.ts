@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Logger, LoggerConfiguration } from 'serilogger';
-import { ApiSink, IApiLogService } from 'src/app/serilogSinks/ApiSink';
-import { BrowserColoredConsoleSink } from 'src/app/serilogSinks/BrowserColoredConsoleSink';
 import { LogApiService } from '../LogApi/log-api.service';
+import { ApiSink, IApiLogService } from '../../serilogSinks/ApiSink';
+import { BrowserColoredConsoleSink } from '../../serilogSinks/BrowserColoredConsoleSink';
 
 /**
  * Service für Lognachrichten

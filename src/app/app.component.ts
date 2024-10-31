@@ -1,17 +1,17 @@
-import { Component, ViewEncapsulation } from '@angular/core';
+import { Component } from '@angular/core';
 import { LoggerService } from './services/Logger/logger.service';
 
 @Component({
-    selector: 'app-root',
-    templateUrl: './app.component.html',
-    styleUrls: ['./app.component.less']
+  selector: 'app-root',
+  templateUrl: './app.component.html',
+  styleUrl: './app.component.less'
 })
 export class AppComponent {
 
-    public constructor(loggerService: LoggerService)
-    {
+  public constructor(loggerService: LoggerService)
+  {
 
-    }
+  }
 
-    title = 'Heizungsdaten';
+  title = 'Heizungsdaten';
 }

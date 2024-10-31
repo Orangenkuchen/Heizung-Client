@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import * as moment from 'moment';
+import moment from 'moment';
 import { Observable } from 'rxjs';
 import { Logger } from 'serilogger';
 import { DayOperatingHoures } from '../entities/DayOperatingHoures';
@@ -9,9 +9,9 @@ import { LoggerService } from '../services/Logger/logger.service';
 @Component({
   selector: 'app-run-time',
   templateUrl: './run-time.component.html',
-  styleUrls: ['./run-time.component.less']
+  styleUrl: './run-time.component.less'
 })
-export class RunTimeComponent implements OnInit 
+export class RunTimeComponent implements OnInit
 {
     // #region filelds
     /**
@@ -38,6 +38,13 @@ export class RunTimeComponent implements OnInit
         this.logger = loggerService.Logger;
 
         this.logger.debug("Run-Time-Component initialisiert (Konstruktor)");
+        let currentMoment = moment();
+        let to = currentMoment.toDate();
+        let from = currentMoment.add(-1, 'month').toDate();
+        
+        this.logger.info("Ermittelt die Betriebstunden im Zeitraum von {0} bis {1}", from, to);
+        this.displayOperatingHouresPromise = this.heaterDataService.GetOperatingHoures(from, to);
+        this.logger.debug("Run-Time initialisiert (Angular ngOnInit)");
     }
     // #endregion
 
@@ -47,13 +54,6 @@ export class RunTimeComponent implements OnInit
      */
     public ngOnInit(): void 
     {
-        let currentMoment = moment();
-        let to = currentMoment.toDate();
-        let from = currentMoment.add(-1, 'month').toDate();
-        
-        this.logger.info("Ermittelt die Betriebstunden im Zeitraum von {0} bis {1}", from, to);
-        this.displayOperatingHouresPromise = this.heaterDataService.GetOperatingHoures(from, to);
-        this.logger.debug("Run-Time initialisiert (Angular ngOnInit)");
     }
     // #endregion
 

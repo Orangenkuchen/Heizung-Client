@@ -1,23 +1,22 @@
-import { BrowserModule } from '@angular/platform-browser';
 import { ErrorHandler, NgModule } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { FormsModule } from '@angular/forms';
-import { HttpClient, HttpClientModule, HttpHandler } from '@angular/common/http';
 import { DashboardComponent } from './dashboard/dashboard.component';
-import { GaugeModule } from 'angular-gauge';
 import { HistoryComponent } from './history/history.component';
+import { MailNotifierSettingsComponent } from './mail-notifier-settings/mail-notifier-settings.component';
 import { MenuComponent } from './menu/menu.component';
 import { RunTimeComponent } from './run-time/run-time.component';
-import { MailNotifierSettingsComponent } from './mail-notifier-settings/mail-notifier-settings.component';
 import { ValueOverviewComponent } from './value-overview/value-overview.component';
-import { ServiceWorkerModule } from '@angular/service-worker';
-import { environment } from '../environments/environment';
-import { LoggerConfiguration, Logger } from 'serilogger';
+import { FormsModule } from '@angular/forms';
+import { GaugeModule } from 'angular-gauge';
 import { CustomErrorHandler } from './entities/CustomErrorHandler/CustomErrorHandler';
-import { NavigationCancel, NavigationEnd, NavigationError, NavigationStart, Router, RoutesRecognized } from '@angular/router';
 import { LoggerService } from './services/Logger/logger.service';
+import { Router, NavigationStart, NavigationEnd, NavigationCancel, NavigationError, RoutesRecognized } from '@angular/router';
+import { Logger } from 'serilogger';
+import { HttpClientModule } from '@angular/common/http';
+import { ChartModule } from 'angular-highcharts';
 
 @NgModule({
     declarations: [
@@ -27,22 +26,22 @@ import { LoggerService } from './services/Logger/logger.service';
         MenuComponent,
         RunTimeComponent,
         MailNotifierSettingsComponent,
-        ValueOverviewComponent,
+        ValueOverviewComponent
     ],
     imports: [
         BrowserModule,
         AppRoutingModule,
         HttpClientModule,
+        ChartModule,
         FormsModule,
         GaugeModule.forRoot(),
-        ServiceWorkerModule.register('ngsw-worker.js', { enabled: environment.production })
     ],
     providers: [
         { provide: ErrorHandler, useClass: CustomErrorHandler, deps: [ LoggerService ] }
     ],
     bootstrap: [AppComponent]
 })
-export class AppModule 
+export class AppModule
 {
     // #region fields
     /**

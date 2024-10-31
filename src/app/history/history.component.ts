@@ -1,30 +1,19 @@
-import { Component, OnInit, OnDestroy, ViewEncapsulation } from '@angular/core';
-import * as Highcharts from 'highcharts';
-import * as moment from 'moment';
+import { Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
+import moment from 'moment';
 import { Logger } from 'serilogger';
 import { HeaterDataType } from '../entities/HeaterDataType';
-import { CurrentDataService, HeaterDataHashMap } from '../services/CurrentDataService/current-data.service';
+import { HeaterDataHashMap } from '../services/CurrentDataService/current-data.service';
 import { HeaterDataService } from '../services/HeaterData/heater-data.service';
 import { LoggerService } from '../services/Logger/logger.service';
-
-declare var require: any;
-let Boost = require('highcharts/modules/boost');
-let noData = require('highcharts/modules/no-data-to-display');
-let More = require('highcharts/highcharts-more');
-
-Boost(Highcharts);
-noData(Highcharts);
-More(Highcharts);
-noData(Highcharts);
-
+import Highcharts from 'highcharts';
 @Component({
     selector: 'app-history',
     templateUrl: './history.component.html',
-    styleUrls: ['./history.component.less'],
+    styleUrl: './history.component.less',
     encapsulation: ViewEncapsulation.None
 })
-export class HistoryComponent implements OnInit, OnDestroy {
-
+export class HistoryComponent implements OnInit, OnDestroy
+{
     // #region fields
     /**
      * Dieser Array enthält unsubscribe Funktionen
@@ -74,6 +63,13 @@ export class HistoryComponent implements OnInit, OnDestroy {
         this.logger = loggerService.Logger;
         this.heaterDataService = heaterDataService;
 
+        this.showedDaysCount = 0;
+        this.currentWeekNumber = 0;
+        this.chartContainerElement = document.createElement("div");
+        this.currentMoment = moment();
+
+        this.historyHighChart = Highcharts.chart('container', this.options);
+
         this.logger.debug("History-Component initialisiert (Konstruktor)");
     }
     // #endregion
@@ -90,10 +86,8 @@ export class HistoryComponent implements OnInit, OnDestroy {
             }
         });
 
-        this.chartContainerElement = document.getElementById("container").parentElement as HTMLDivElement;
-        this.historyHighChart = Highcharts.chart('container', this.options);
+        this.chartContainerElement = document.getElementById("container")!.parentElement as HTMLDivElement;
 
-        this.currentMoment = moment();
         this.changeDisplayedWeek(0);
 
         this.logger.debug("History-Component initialisiert (Angular ngOnInit)");
@@ -157,8 +151,8 @@ export class HistoryComponent implements OnInit, OnDestroy {
         xAxis: {
             type: 'datetime',
             labels: {
-                formatter: function() {
-                return Highcharts.dateFormat('%e %b %y', this.value);
+                formatter: function(a: string, value: number): string {
+                    return Highcharts.dateFormat('%e %b %y', value);
                 }
             }
         },

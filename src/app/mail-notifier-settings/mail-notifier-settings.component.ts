@@ -1,23 +1,18 @@
 import { Component, OnInit } from '@angular/core';
-import { Logger } from 'serilogger';
 import { MailConfig } from '../entities/MailConfig';
 import { NotifierConfig } from '../entities/NotifierConfig';
+import { Logger } from 'serilogger';
 import { LoggerService } from '../services/Logger/logger.service';
 import { MailService } from '../services/Mail/mail.service';
 
 @Component({
   selector: 'app-mail-notifier-settings',
   templateUrl: './mail-notifier-settings.component.html',
-  styleUrls: ['./mail-notifier-settings.component.less']
+  styleUrl: './mail-notifier-settings.component.less'
 })
-export class MailNotifierSettingsComponent implements OnInit 
+export class MailNotifierSettingsComponent implements OnInit
 {
     // #region fields
-    /**
-     * Benachrichtungskonfiguration
-     */
-    private notifierConfig: NotifierConfig;
-
     /**
      * Service für die Mailconfiguration
      */
@@ -40,6 +35,16 @@ export class MailNotifierSettingsComponent implements OnInit
     {
         this.mailService = mailService;
         this.logger = loggerService.Logger;
+        this.NotifierConfig = <any>{};
+
+        this.mailService.GetConfiguration()
+                        .subscribe(
+            (notifierConfig) =>
+            {
+                this.NotifierConfig = notifierConfig;
+            }, 
+            (error) => this.logger.fatal(error, "MailNotifierSettingsComponent: ngOnInit > Fehler beim Ermitteln der MailConfig: ")
+        );
 
         this.logger.debug("Mail-Notifier-Settings-Component initialisiert (Konstruktor)");
     }
@@ -49,18 +54,17 @@ export class MailNotifierSettingsComponent implements OnInit
     /**
      * Diese Funtion wird von Angular beim Intitieren der Componente ausgeführt
      */
-    public ngOnInit(): void {
-        this.mailService.GetConfiguration()
-                        .subscribe(
-            (notifierConfig) =>
-            {
-                this.notifierConfig = notifierConfig;
-            }, 
-            (error) => this.logger.fatal(error, "MailNotifierSettingsComponent: ngOnInit > Fehler beim Ermitteln der MailConfig: ")
-        );
-
+    public ngOnInit(): void
+    {
         this.logger.debug("Mail-Notifier-Settings-Component initialisiert (Angular ngOnInit)");
     }
+    // #endregion
+
+    // #region NotifierConfig
+    /**
+     * Benachrichtungskonfiguration
+     */
+    public NotifierConfig: NotifierConfig;
     // #endregion
 
     // #region saveMails
@@ -68,9 +72,9 @@ export class MailNotifierSettingsComponent implements OnInit
      * Sendet die Mailconfig an den Server, damit diese gespeichert werden können
      */
     public saveMails() {
-        this.logger.info("Mail-Notifier-Settings-Component: saveMail wurde aufgerufen (notifierConfig: {notifierConfig})", this.notifierConfig);
+        this.logger.info("Mail-Notifier-Settings-Component: saveMail wurde aufgerufen (notifierConfig: {notifierConfig})", this.NotifierConfig);
 
-        this.mailService.SetConfiguration(this.notifierConfig)
+        this.mailService.SetConfiguration(this.NotifierConfig)
                         .subscribe(
             () => 
             {
@@ -91,9 +95,9 @@ export class MailNotifierSettingsComponent implements OnInit
     public addEmptyMail(): void {
         this.logger.info("Mail-Notifier-Settings-Component: addEmptyMail wurde aufgerufen");
 
-        if (this.notifierConfig != null) {
-            if (typeof this.notifierConfig.mailConfigs === "object") {
-                this.notifierConfig.mailConfigs.push({ mail: "" });
+        if (this.NotifierConfig != null) {
+            if (typeof this.NotifierConfig.mailConfigs === "object") {
+                this.NotifierConfig.mailConfigs.push({ mail: "" });
             }
         }
 
@@ -109,10 +113,10 @@ export class MailNotifierSettingsComponent implements OnInit
     public removeMail(mailConfigToRemove: MailConfig) {
         this.logger.info("Mail-Notifier-Settings-Component: removeMail wurde aufgerufen (mailConfigToRemove: {mailConfigToRemove})", mailConfigToRemove);
 
-        if (this.notifierConfig != null) {
-            if (typeof this.notifierConfig.mailConfigs === "object") {
-                let index = this.notifierConfig.mailConfigs.indexOf(mailConfigToRemove);
-                this.notifierConfig.mailConfigs.splice(index, 1);
+        if (this.NotifierConfig != null) {
+            if (typeof this.NotifierConfig.mailConfigs === "object") {
+                let index = this.NotifierConfig.mailConfigs.indexOf(mailConfigToRemove);
+                this.NotifierConfig.mailConfigs.splice(index, 1);
             }
         }
 

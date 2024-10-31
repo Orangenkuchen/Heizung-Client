@@ -1,24 +1,17 @@
-import { Component, OnInit, ɵisBoundToModule__POST_R3__, ViewEncapsulation } from '@angular/core';
-import { Subject } from 'rxjs';
-import * as Moment from 'moment-timezone';
-import { CurrentDataService } from '../services/CurrentDataService/current-data.service';
+import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { Logger } from 'serilogger';
+import { CurrentDataService } from '../services/CurrentDataService/current-data.service';
 import { LoggerService } from '../services/Logger/logger.service';
 
 @Component({
-  selector: 'app-dashboard',
-  templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.less'],
-  encapsulation : ViewEncapsulation.None
+    selector: 'app-dashboard',
+    templateUrl: './dashboard.component.html',
+    styleUrl: './dashboard.component.less',
+    encapsulation: ViewEncapsulation.None
 })
-export class DashboardComponent implements OnInit 
+export class DashboardComponent implements OnInit
 {
     // #region fields
-    /**
-     * Servcie für die aktuellen Daten von der Heizung
-     */
-    private currentDataService: CurrentDataService;
-
     /**
      * Service für Lognachrichten
      */
@@ -34,7 +27,7 @@ export class DashboardComponent implements OnInit
      */
     public constructor(currentDataService: CurrentDataService, loggerService: LoggerService) 
     {
-        this.currentDataService = currentDataService;
+        this.CurrentDataService = currentDataService;
         this.logger = loggerService.Logger;
 
         this.logger.debug("Dashboard-Component initialisiert (Konstruktor)");
@@ -50,13 +43,20 @@ export class DashboardComponent implements OnInit
     }
     // #endregion
 
+    // #region CurrentDataService
+    /**
+     * Servcie für die aktuellen Daten von der Heizung
+     */
+    public CurrentDataService: CurrentDataService;
+    // #endregion
+
     // #region temperatureToString
     /**
      * Fügt an die Zahl "°C" an
      * 
      * @param number Die Zahl an welche die Zeichenfolge gehängt werden soll
      */
-    public temperatureToString(number: Number): String
+    public temperatureToString(number: number): string
     {
         return number + "°C";
     }
