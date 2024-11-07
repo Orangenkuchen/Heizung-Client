@@ -15,11 +15,10 @@ import { CustomErrorHandler } from './entities/CustomErrorHandler/CustomErrorHan
 import { LoggerService } from './services/Logger/logger.service';
 import { Router, NavigationStart, NavigationEnd, NavigationCancel, NavigationError, RoutesRecognized } from '@angular/router';
 import { Logger } from 'serilogger';
-import { HttpClientModule } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { ChartModule } from 'angular-highcharts';
 
-@NgModule({
-    declarations: [
+@NgModule({ declarations: [
         AppComponent,
         DashboardComponent,
         HistoryComponent,
@@ -28,19 +27,14 @@ import { ChartModule } from 'angular-highcharts';
         MailNotifierSettingsComponent,
         ValueOverviewComponent
     ],
-    imports: [
-        BrowserModule,
+    bootstrap: [AppComponent], imports: [BrowserModule,
         AppRoutingModule,
-        HttpClientModule,
         ChartModule,
         FormsModule,
-        GaugeModule.forRoot(),
-    ],
-    providers: [
-        { provide: ErrorHandler, useClass: CustomErrorHandler, deps: [ LoggerService ] }
-    ],
-    bootstrap: [AppComponent]
-})
+        GaugeModule.forRoot()], providers: [
+        { provide: ErrorHandler, useClass: CustomErrorHandler, deps: [LoggerService] },
+        provideHttpClient(withInterceptorsFromDi())
+    ] })
 export class AppModule
 {
     // #region fields

@@ -67,8 +67,7 @@ export class HistoryComponent implements OnInit, OnDestroy
         this.currentWeekNumber = 0;
         this.chartContainerElement = document.createElement("div");
         this.currentMoment = moment();
-
-        this.historyHighChart = Highcharts.chart('container', this.options);
+        this.historyHighChart = <any>null;
 
         this.logger.debug("History-Component initialisiert (Konstruktor)");
     }
@@ -80,6 +79,8 @@ export class HistoryComponent implements OnInit, OnDestroy
      */
     public ngOnInit(): void 
     {
+        this.historyHighChart = Highcharts.chart('container', this.options);
+
         Highcharts.setOptions({
             time: {
                 timezone: 'Europe/Berlin'
